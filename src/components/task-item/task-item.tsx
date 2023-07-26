@@ -118,7 +118,7 @@ export const TaskItem: React.FC<TaskItemProps> = props => {
         }
         ref={textRef}
       >
-        {task.name}
+        {/* {task.name} */}
       </text>
     </g>
   );

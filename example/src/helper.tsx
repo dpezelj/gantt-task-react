@@ -93,6 +93,27 @@ export function initTasks() {
       isDisabled: true,
       type: "task",
     },
+/*     {
+      start: new Date(currentDate.getFullYear(), currentDate.getMonth(), 1),
+      end: new Date(currentDate.getFullYear(), currentDate.getMonth(), 15),
+      name: "Some Project 2",
+      id: "ProjectSample1",
+      progress: 25,
+      type: "project",
+      hideChildren: false,
+      displayOrder: 8,
+    },
+    {
+      start: new Date(currentDate.getFullYear(), currentDate.getMonth(), 15),
+      end: new Date(currentDate.getFullYear(), currentDate.getMonth(), 15),
+      name: "Release 5",
+      id: "6",
+      progress: currentDate.getMonth(),
+      type: "milestone",
+      dependencies: ["4"],
+      project: "ProjectSample1",
+      displayOrder: 9,
+    }, */
   ];
   return tasks;
 }

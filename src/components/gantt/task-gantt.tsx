@@ -39,7 +39,7 @@ export const TaskGantt: React.FC<TaskGanttProps> = ({
 
   return (
     <div
-      className={styles.ganttVerticalContainer}
+      className={styles.ganttVerticalContainerChanged}
       ref={verticalGanttContainerRef}
       dir="ltr"
     >

@@ -1,5 +1,5 @@
 import React from "react";
-import styles from "./task-list-header.module.css";
+ import styles from "./task-list-header.module.css";
 
 export const TaskListHeaderDefault: React.FC<{
   headerHeight: number;
@@ -27,7 +27,7 @@ export const TaskListHeaderDefault: React.FC<{
             minWidth: rowWidth,
           }}
         >
-          &nbsp;Name
+          {/* &nbsp;Name */}
         </div>
         <div
           className={styles.ganttTable_HeaderSeparator}
@@ -42,7 +42,7 @@ export const TaskListHeaderDefault: React.FC<{
             minWidth: rowWidth,
           }}
         >
-          &nbsp;From
+          {/* &nbsp;From */}
         </div>
         <div
           className={styles.ganttTable_HeaderSeparator}
@@ -57,7 +57,7 @@ export const TaskListHeaderDefault: React.FC<{
             minWidth: rowWidth,
           }}
         >
-          &nbsp;To
+          {/* &nbsp;To */}
         </div>
       </div>
     </div>

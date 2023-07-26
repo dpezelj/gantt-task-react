@@ -176,9 +176,14 @@ export const Calendar: React.FC<CalendarProps> = ({
     const dates = dateSetup.dates;
     for (let i = 0; i < dates.length; i++) {
       const date = dates[i];
-      const bottomValue = `${getLocalDayOfWeek(date, locale, "short")}, ${date
+      /* const bottomValue = `${getLocalDayOfWeek(date, locale, "short")}, ${date
         .getDate()
-        .toString()}`;
+        .toString()}`; */
+
+        const bottomValue = date.toLocaleDateString(locale, {
+          day: '2-digit',
+          month: '2-digit',
+        });
 
       bottomValues.push(
         <text
@@ -187,7 +192,7 @@ export const Calendar: React.FC<CalendarProps> = ({
           x={columnWidth * i + columnWidth * 0.5}
           className={styles.calendarBottomText}
         >
-          {bottomValue}
+          {bottomValue.split("/").join(".")}{/* added split join */}
         </text>
       );
       if (

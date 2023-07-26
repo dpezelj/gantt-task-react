@@ -1,7 +1,8 @@
 import React, { useMemo } from "react";
 import styles from "./task-list-table.module.css";
 import { Task } from "../../types/public-types";
-
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 const localeDateStringCache = {};
 const toLocaleDateStringFactory =
   (locale: string) =>
@@ -14,6 +15,12 @@ const toLocaleDateStringFactory =
     }
     return lds;
   };
+
+  function formatDate(inputDate: string) {
+    const dateObject = new Date(inputDate);
+    /* const options = { day: '2-digit', month: '2-digit', year: 'numeric' }; */
+    return dateObject.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  }
 const dateTimeOptions: Intl.DateTimeFormatOptions = {
   weekday: "short",
   year: "numeric",
@@ -54,11 +61,11 @@ export const TaskListTableDefault: React.FC<{
       }}
     >
       {tasks.map(t => {
-        let expanderSymbol = "";
+        let expanderSymbol = null;
         if (t.hideChildren === false) {
-          expanderSymbol = "▼";
+          expanderSymbol = <ExpandMoreIcon />;
         } else if (t.hideChildren === true) {
-          expanderSymbol = "▶";
+          expanderSymbol = <ChevronRightIcon />/* "▶" */;
         }
 
         return (
@@ -86,26 +93,29 @@ export const TaskListTableDefault: React.FC<{
                 >
                   {expanderSymbol}
                 </div>
-                <div>{t.name}</div>
+                <div style={{margin: "auto"}}>{t.name}</div>
               </div>
             </div>
-            <div
+{/*             <div
               className={styles.taskListCell}
               style={{
                 minWidth: rowWidth,
                 maxWidth: rowWidth,
               }}
             >
-              &nbsp;{toLocaleDateString(t.start, dateTimeOptions)}
-            </div>
+              &nbsp;{formatDate(toLocaleDateString(t.start, dateTimeOptions))}
+            </div> */}
             <div
               className={styles.taskListCell}
               style={{
                 minWidth: rowWidth,
                 maxWidth: rowWidth,
+                width: "67%",
+                textAlign: "center",
               }}
             >
-              &nbsp;{toLocaleDateString(t.end, dateTimeOptions)}
+              &nbsp;{`${formatDate(toLocaleDateString(t.start, dateTimeOptions)).split('/').join('.')} - ${formatDate(toLocaleDateString(t.end, dateTimeOptions)).split('/').join('.')}`}
+              {/* &nbsp;{formatDate(toLocaleDateString(t.end, dateTimeOptions))} */}
             </div>
           </div>
         );
