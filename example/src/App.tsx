@@ -1,13 +1,130 @@
 import React from "react";
 import { Task, ViewMode, Gantt } from "gantt-task-react";
 import { ViewSwitcher } from "./components/view-switcher";
-import { getStartEndDateForProject, initTasks } from "./helper";
+import { getStartEndDateForProject } from "./helper";
 import "gantt-task-react/dist/index.css";
+
+const currentDate = new Date();
+const data: Task[] = [
+  {
+    start: new Date(currentDate.getFullYear(), currentDate.getMonth(), 1),
+    end: new Date(currentDate.getFullYear(), currentDate.getMonth(), 15),
+    name: "Some Project",
+    id: "ProjectSample",
+    progress: 25,
+    type: "project",
+    hideChildren: false,
+    displayOrder: 1,
+    color: "blue",
+  },
+  {
+    start: new Date(currentDate.getFullYear(), currentDate.getMonth(), 1),
+    end: new Date(currentDate.getFullYear(), currentDate.getMonth(), 2, 12, 28),
+    name: "Idea",
+    id: "Task 0",
+    progress: 45,
+    type: "task",
+    project: "ProjectSample",
+    displayOrder: 2,
+    color: "blue",
+  },
+  {
+    start: new Date(currentDate.getFullYear(), currentDate.getMonth(), 2),
+    end: new Date(currentDate.getFullYear(), currentDate.getMonth(), 4, 0, 0),
+    name: "Research",
+    id: "Task 1",
+    progress: 25,
+    dependencies: ["Task 0"],
+    type: "task",
+    project: "ProjectSample",
+    displayOrder: 3,
+    color: "blue",
+  },
+  {
+    start: new Date(currentDate.getFullYear(), currentDate.getMonth(), 4),
+    end: new Date(currentDate.getFullYear(), currentDate.getMonth(), 8, 0, 0),
+    name: "Discussion with team",
+    id: "Task 2",
+    progress: 10,
+    dependencies: ["Task 1"],
+    type: "task",
+    project: "ProjectSample",
+    displayOrder: 4,
+    color: "blue",
+  },
+  {
+    start: new Date(currentDate.getFullYear(), currentDate.getMonth(), 8),
+    end: new Date(currentDate.getFullYear(), currentDate.getMonth(), 9, 0, 0),
+    name: "Developing",
+    id: "Task 3",
+    progress: 2,
+    dependencies: ["Task 2"],
+    type: "task",
+    project: "ProjectSample",
+    displayOrder: 5,
+    color: "blue",
+  },
+  {
+    start: new Date(currentDate.getFullYear(), currentDate.getMonth(), 8),
+    end: new Date(currentDate.getFullYear(), currentDate.getMonth(), 10),
+    name: "Review",
+    id: "Task 4",
+    type: "task",
+    progress: 70,
+    dependencies: ["Task 2"],
+    project: "ProjectSample",
+    displayOrder: 6,
+    color: "blue",
+  },
+  {
+    start: new Date(currentDate.getFullYear(), currentDate.getMonth(), 15),
+    end: new Date(currentDate.getFullYear(), currentDate.getMonth(), 15),
+    name: "Release",
+    id: "Task 6",
+    progress: currentDate.getMonth(),
+    type: "milestone",
+    dependencies: ["Task 4"],
+    project: "ProjectSample",
+    displayOrder: 7,
+    color: "blue",
+  },
+  {
+    start: new Date(currentDate.getFullYear(), currentDate.getMonth(), 18),
+    end: new Date(currentDate.getFullYear(), currentDate.getMonth(), 19),
+    name: "Party Time",
+    id: "Task 9",
+    progress: 0,
+    isDisabled: true,
+    type: "task",
+    color: "red",
+  },
+  /*     {
+    start: new Date(currentDate.getFullYear(), currentDate.getMonth(), 1),
+    end: new Date(currentDate.getFullYear(), currentDate.getMonth(), 15),
+    name: "Some Project 2",
+    id: "ProjectSample1",
+    progress: 25,
+    type: "project",
+    hideChildren: false,
+    displayOrder: 8,
+  },
+  {
+    start: new Date(currentDate.getFullYear(), currentDate.getMonth(), 15),
+    end: new Date(currentDate.getFullYear(), currentDate.getMonth(), 15),
+    name: "Release 5",
+    id: "6",
+    progress: currentDate.getMonth(),
+    type: "milestone",
+    dependencies: ["4"],
+    project: "ProjectSample1",
+    displayOrder: 9,
+  }, */
+];
 
 // Init
 const App = () => {
   const [view, setView] = React.useState<ViewMode>(ViewMode.Day);
-  const [tasks, setTasks] = React.useState<Task[]>(initTasks());
+  const [tasks, setTasks] = React.useState<Task[]>(data);
   const [isChecked, setIsChecked] = React.useState(true);
   let columnWidth = 65;
   if (view === ViewMode.Year) {
@@ -64,6 +181,7 @@ const App = () => {
 
   const handleExpanderClick = (task: Task) => {
     setTasks(tasks.map(t => (t.id === task.id ? task : t)));
+
     console.log("On expander click Id:" + task.id);
   };
 
@@ -76,7 +194,7 @@ const App = () => {
       />
       <h3>Gantt With Unlimited Height</h3>
       <Gantt
-        tasks={tasks}
+        tasks={data}
         viewMode={view}
         onDateChange={handleTaskChange}
         onDelete={handleTaskDelete}
@@ -87,10 +205,11 @@ const App = () => {
         onExpanderClick={handleExpanderClick}
         listCellWidth={isChecked ? "155px" : ""}
         columnWidth={columnWidth}
+        rowHeight={32}
       />
       <h3>Gantt With Limited Height</h3>
       <Gantt
-        tasks={tasks}
+        tasks={data}
         viewMode={view}
         onDateChange={handleTaskChange}
         onDelete={handleTaskDelete}

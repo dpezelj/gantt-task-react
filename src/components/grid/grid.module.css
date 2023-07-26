@@ -3,13 +3,13 @@
 }
 
 .gridRow:nth-child(even) {
-  fill: #f5f5f5;
+  fill: #fff;
 }
 
 .gridRowLine {
-  stroke: #ebeff2;
+  stroke: #fafafa;
 }
 
 .gridTick {
-  stroke: #e6e4e4;
+  stroke: #fafafa;
 }

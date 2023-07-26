@@ -31,9 +31,9 @@ export const Bar: React.FC<TaskItemProps> = ({
     <g className={styles.barWrapper} tabIndex={0}>
       <BarDisplay
         x={task.x1}
-        y={task.y}
+        y={task.y + 5}
         width={task.x2 - task.x1}
-        height={task.height}
+        height={15}
         progressX={task.progressX}
         progressWidth={0} //HARDCODED TO FULL COLOR THE TASK BAR
         barCornerRadius={task.barCornerRadius}

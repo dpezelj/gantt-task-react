@@ -130,8 +130,8 @@ export const StandardTooltipContent: React.FC<{
           <div style={{ margin: "auto" }}>
             <div
               style={{
-                background: resolveChipColor("blue", "Title chip"),
-                color: resolveChipLabelColor("blue", "Title chip"),
+                background: resolveChipColor(task.color, "Title chip"),
+                color: resolveChipLabelColor(task.color, "Title chip"),
                 padding: "0.5rem 1rem",
                 borderRadius: "50px",
                 fontWeight: "600",

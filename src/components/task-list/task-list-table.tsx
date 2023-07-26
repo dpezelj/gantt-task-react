@@ -83,7 +83,7 @@ export const TaskListTableDefault: React.FC<{
             <div
               className={styles.taskListCell}
               style={{
-                minWidth: rowWidth,
+                minWidth: "270px",
                 maxWidth: rowWidth,
               }}
               title={t.name}
@@ -108,13 +108,22 @@ export const TaskListTableDefault: React.FC<{
                         padding: "0.5rem 1rem",
                         borderRadius: "50px",
                         fontWeight: "600",
+                        fontSize: "12px",
+                        maxHeight: "30px",
+                        lineHeight: 1,
+                        maxWidth: "235px",
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
                       }}
                     >
                       {t.name}
                     </div>
                   </div>
                 ) : (
-                  <div style={{ margin: "auto" }}>{t.name}</div>
+                  <div style={{ margin: "auto", fontSize: "12px" }}>
+                    {t.name}
+                  </div>
                 )}
               </div>
             </div>
@@ -134,6 +143,8 @@ export const TaskListTableDefault: React.FC<{
                 maxWidth: rowWidth,
                 width: "67%",
                 textAlign: "center",
+                color: "#747474",
+                fontSize: "12px",
               }}
             >
               &nbsp;
