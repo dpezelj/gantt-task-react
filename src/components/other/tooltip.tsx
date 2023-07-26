@@ -135,6 +135,13 @@ export const StandardTooltipContent: React.FC<{
                 padding: "0.5rem 1rem",
                 borderRadius: "50px",
                 fontWeight: "600",
+                fontSize: "12px",
+                maxHeight: "30px",
+                lineHeight: 1,
+                maxWidth: "235px",
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
               }}
             >
               {task.name}

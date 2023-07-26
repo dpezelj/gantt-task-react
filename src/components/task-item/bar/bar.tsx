@@ -31,7 +31,7 @@ export const Bar: React.FC<TaskItemProps> = ({
     <g className={styles.barWrapper} tabIndex={0}>
       <BarDisplay
         x={task.x1}
-        y={task.y + 5}
+        y={task.y+2}
         width={task.x2 - task.x1}
         height={15}
         progressX={task.progressX}

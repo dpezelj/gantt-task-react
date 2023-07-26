@@ -36,7 +36,7 @@ export const Project: React.FC<TaskItemProps> = ({ task /* isSelected */ }) => {
         fill={resolveChipColor(task.color, "test")} //COLOR OF !PROGRESS
         x={task.x1}
         width={projectWith}
-        y={task.y}
+        y={task.y + 7}
         height={5}
         rx={task.barCornerRadius}
         ry={task.barCornerRadius}
@@ -45,7 +45,7 @@ export const Project: React.FC<TaskItemProps> = ({ task /* isSelected */ }) => {
       <rect
         x={task.progressX}
         width={task.progressWidth}
-        y={task.y}
+        y={task.y + 7}
         height={5}
         ry={task.barCornerRadius}
         rx={task.barCornerRadius}
