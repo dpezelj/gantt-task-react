@@ -180,10 +180,10 @@ export const Calendar: React.FC<CalendarProps> = ({
         .getDate()
         .toString()}`; */
 
-        const bottomValue = date.toLocaleDateString(locale, {
-          day: '2-digit',
-          month: '2-digit',
-        });
+      const bottomValue = date.toLocaleDateString(locale, {
+        day: "2-digit",
+        month: "2-digit",
+      });
 
       bottomValues.push(
         <text
@@ -192,14 +192,18 @@ export const Calendar: React.FC<CalendarProps> = ({
           x={columnWidth * i + columnWidth * 0.5}
           className={styles.calendarBottomText}
         >
-          {bottomValue.split("/").join(".")}{/* added split join */}
+          {bottomValue.split("/").join(".")}
+          {/* added split join */}
         </text>
       );
       if (
         i + 1 !== dates.length &&
         date.getMonth() !== dates[i + 1].getMonth()
       ) {
-        const topValue = getLocaleMonth(date, locale);
+        const topValue = `${getLocaleMonth(
+          date,
+          locale
+        )}, ${date.getFullYear()}`;
 
         topValues.push(
           <TopPartOfCalendar
@@ -322,9 +326,9 @@ export const Calendar: React.FC<CalendarProps> = ({
       [topValues, bottomValues] = getCalendarValuesForYear();
       break;
     case ViewMode.Month:
-        [topValues, bottomValues] = getCalendarValuesForMonth();
-        break;
-      case ViewMode.Week:
+      [topValues, bottomValues] = getCalendarValuesForMonth();
+      break;
+    case ViewMode.Week:
       [topValues, bottomValues] = getCalendarValuesForWeek();
       break;
     case ViewMode.Day:

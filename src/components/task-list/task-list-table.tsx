@@ -1,8 +1,10 @@
 import React, { useMemo } from "react";
 import styles from "./task-list-table.module.css";
 import { Task } from "../../types/public-types";
-import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import { useProvideChipColors } from "./useProvideChipColors";
+
 const localeDateStringCache = {};
 const toLocaleDateStringFactory =
   (locale: string) =>
@@ -16,11 +18,14 @@ const toLocaleDateStringFactory =
     return lds;
   };
 
-  function formatDate(inputDate: string) {
-    const dateObject = new Date(inputDate);
-    /* const options = { day: '2-digit', month: '2-digit', year: 'numeric' }; */
-    return dateObject.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
-  }
+function formatDate(inputDate: string) {
+  const dateObject = new Date(inputDate);
+  /* const options = { day: '2-digit', month: '2-digit', year: 'numeric' }; */
+  return dateObject.toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "2-digit",
+  });
+}
 const dateTimeOptions: Intl.DateTimeFormatOptions = {
   weekday: "short",
   year: "numeric",
@@ -47,6 +52,7 @@ export const TaskListTableDefault: React.FC<{
   locale,
   onExpanderClick,
 }) => {
+  const { resolveChipColor, resolveChipLabelColor } = useProvideChipColors();
   const toLocaleDateString = useMemo(
     () => toLocaleDateStringFactory(locale),
     [locale]
@@ -65,7 +71,7 @@ export const TaskListTableDefault: React.FC<{
         if (t.hideChildren === false) {
           expanderSymbol = <ExpandMoreIcon />;
         } else if (t.hideChildren === true) {
-          expanderSymbol = <ChevronRightIcon />/* "▶" */;
+          expanderSymbol = <ChevronRightIcon /> /* "▶" */;
         }
 
         return (
@@ -93,10 +99,26 @@ export const TaskListTableDefault: React.FC<{
                 >
                   {expanderSymbol}
                 </div>
-                <div style={{margin: "auto"}}>{t.name}</div>
+                {t.type === "project" ? (
+                  <div style={{ margin: "auto" }}>
+                    <div
+                      style={{
+                        background: resolveChipColor(t.color, "Title chip"),
+                        color: resolveChipLabelColor(t.color, "Title chip"),
+                        padding: "0.5rem 1rem",
+                        borderRadius: "50px",
+                        fontWeight: "600",
+                      }}
+                    >
+                      {t.name}
+                    </div>
+                  </div>
+                ) : (
+                  <div style={{ margin: "auto" }}>{t.name}</div>
+                )}
               </div>
             </div>
-{/*             <div
+            {/*             <div
               className={styles.taskListCell}
               style={{
                 minWidth: rowWidth,
@@ -114,7 +136,14 @@ export const TaskListTableDefault: React.FC<{
                 textAlign: "center",
               }}
             >
-              &nbsp;{`${formatDate(toLocaleDateString(t.start, dateTimeOptions)).split('/').join('.')} - ${formatDate(toLocaleDateString(t.end, dateTimeOptions)).split('/').join('.')}`}
+              &nbsp;
+              {`${formatDate(toLocaleDateString(t.start, dateTimeOptions))
+                .split("/")
+                .join(".")} - ${formatDate(
+                toLocaleDateString(t.end, dateTimeOptions)
+              )
+                .split("/")
+                .join(".")}`}
               {/* &nbsp;{formatDate(toLocaleDateString(t.end, dateTimeOptions))} */}
             </div>
           </div>

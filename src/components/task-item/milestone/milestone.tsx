@@ -1,6 +1,7 @@
 import React from "react";
 import { TaskItemProps } from "../task-item";
 import styles from "./milestone.module.css";
+import { useProvideChipColors } from "../../task-list/useProvideChipColors";
 
 export const Milestone: React.FC<TaskItemProps> = ({
   task,
@@ -8,12 +9,13 @@ export const Milestone: React.FC<TaskItemProps> = ({
   onEventStart,
   isSelected,
 }) => {
+  const { resolveChipColor, resolveChipLabelColor } = useProvideChipColors();
   const transform = `rotate(45 ${task.x1 + task.height * 0.356} 
     ${task.y + task.height * 0.85})`;
   const getBarColor = () => {
     return isSelected
-      ? task.styles.backgroundSelectedColor
-      : task.styles.backgroundColor;
+      ? resolveChipColor(task.color, "test") || "#ededed"
+      : resolveChipLabelColor(task.color, "test") || "#ededed";
   };
 
   return (

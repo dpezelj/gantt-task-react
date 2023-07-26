@@ -1,17 +1,19 @@
 import React from "react";
 import { TaskItemProps } from "../task-item";
 import styles from "./project.module.css";
+import { useProvideChipColors } from "../../task-list/useProvideChipColors";
 
-export const Project: React.FC<TaskItemProps> = ({ task, isSelected }) => {
-  const barColor = isSelected
+export const Project: React.FC<TaskItemProps> = ({ task /* isSelected */ }) => {
+  const { resolveChipColor, resolveChipLabelColor } = useProvideChipColors();
+  /* const barColor = isSelected
     ? task.styles.backgroundSelectedColor
     : task.styles.backgroundColor;
-/*   const processColor = isSelected
+  /*   const processColor = isSelected
     ? task.styles.progressSelectedColor
     : task.styles.progressColor; */
   const projectWith = task.x2 - task.x1;
 
-/*   const projectLeftTriangle = [
+  /*   const projectLeftTriangle = [
     task.x1,
     task.y + task.height / 2 - 1,
     task.x1,
@@ -31,11 +33,11 @@ export const Project: React.FC<TaskItemProps> = ({ task, isSelected }) => {
   return (
     <g tabIndex={0} className={styles.projectWrapper}>
       <rect
-        fill={"transparent"} //COLOR OF !PROGRESS
+        fill={resolveChipColor(task.color, "test")} //COLOR OF !PROGRESS
         x={task.x1}
         width={projectWith}
         y={task.y}
-        height={task.height}
+        height={10}
         rx={task.barCornerRadius}
         ry={task.barCornerRadius}
         className={styles.projectBackground}
@@ -44,12 +46,12 @@ export const Project: React.FC<TaskItemProps> = ({ task, isSelected }) => {
         x={task.progressX}
         width={task.progressWidth}
         y={task.y}
-        height={task.height}
+        height={10}
         ry={task.barCornerRadius}
         rx={task.barCornerRadius}
-        fill={"transparent"} //COLOR OF PROGRESS
+        fill={resolveChipLabelColor(task.color, "test")} //COLOR OF PROGRESS
       />
-      <rect
+      {/* <rect
         fill={barColor}
         x={task.x1}
         width={projectWith}
@@ -58,7 +60,7 @@ export const Project: React.FC<TaskItemProps> = ({ task, isSelected }) => {
         rx={task.barCornerRadius}
         ry={task.barCornerRadius}
         className={styles.projectTop}
-      />
+      /> */}
       {/* <polygon
         className={styles.projectTop}
         points={projectLeftTriangle}

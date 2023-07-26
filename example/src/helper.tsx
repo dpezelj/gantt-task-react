@@ -12,6 +12,7 @@ export function initTasks() {
       type: "project",
       hideChildren: false,
       displayOrder: 1,
+      color: "blue",
     },
     {
       start: new Date(currentDate.getFullYear(), currentDate.getMonth(), 1),
@@ -28,6 +29,7 @@ export function initTasks() {
       type: "task",
       project: "ProjectSample",
       displayOrder: 2,
+      color: "blue",
     },
     {
       start: new Date(currentDate.getFullYear(), currentDate.getMonth(), 2),
@@ -39,6 +41,7 @@ export function initTasks() {
       type: "task",
       project: "ProjectSample",
       displayOrder: 3,
+      color: "blue",
     },
     {
       start: new Date(currentDate.getFullYear(), currentDate.getMonth(), 4),
@@ -50,6 +53,7 @@ export function initTasks() {
       type: "task",
       project: "ProjectSample",
       displayOrder: 4,
+      color: "blue",
     },
     {
       start: new Date(currentDate.getFullYear(), currentDate.getMonth(), 8),
@@ -61,6 +65,7 @@ export function initTasks() {
       type: "task",
       project: "ProjectSample",
       displayOrder: 5,
+      color: "blue",
     },
     {
       start: new Date(currentDate.getFullYear(), currentDate.getMonth(), 8),
@@ -72,6 +77,7 @@ export function initTasks() {
       dependencies: ["Task 2"],
       project: "ProjectSample",
       displayOrder: 6,
+      color: "blue",
     },
     {
       start: new Date(currentDate.getFullYear(), currentDate.getMonth(), 15),
@@ -83,6 +89,7 @@ export function initTasks() {
       dependencies: ["Task 4"],
       project: "ProjectSample",
       displayOrder: 7,
+      color: "blue",
     },
     {
       start: new Date(currentDate.getFullYear(), currentDate.getMonth(), 18),
@@ -92,8 +99,9 @@ export function initTasks() {
       progress: 0,
       isDisabled: true,
       type: "task",
+      color: "red",
     },
-/*     {
+    /*     {
       start: new Date(currentDate.getFullYear(), currentDate.getMonth(), 1),
       end: new Date(currentDate.getFullYear(), currentDate.getMonth(), 15),
       name: "Some Project 2",

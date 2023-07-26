@@ -2,6 +2,7 @@ import React, { useRef, useEffect, useState } from "react";
 import { Task } from "../../types/public-types";
 import { BarTask } from "../../types/bar-task";
 import styles from "./tooltip.module.css";
+import { useProvideChipColors } from "../task-list/useProvideChipColors";
 
 export type TooltipProps = {
   task: BarTask;
@@ -117,14 +118,35 @@ export const StandardTooltipContent: React.FC<{
   fontSize: string;
   fontFamily: string;
 }> = ({ task, fontSize, fontFamily }) => {
+  const { resolveChipColor, resolveChipLabelColor } = useProvideChipColors();
   const style = {
     fontSize,
     fontFamily,
   };
   return (
     <div className={styles.tooltipDefaultContainer} style={style}>
-      <b style={{ fontSize: fontSize + 6, textAlign: "center" }}>{`${task.name}`}</b>
-      <pre className={styles.tooltipDefaultContainerParagraph}>{`${task.start.getDate()}.${
+      <b style={{ fontSize: fontSize + 6, textAlign: "center" }}>
+        {task.type === "project" ? (
+          <div style={{ margin: "auto" }}>
+            <div
+              style={{
+                background: resolveChipColor("blue", "Title chip"),
+                color: resolveChipLabelColor("blue", "Title chip"),
+                padding: "0.5rem 1rem",
+                borderRadius: "50px",
+                fontWeight: "600",
+              }}
+            >
+              {task.name}
+            </div>
+          </div>
+        ) : (
+          <div style={{ margin: "auto" }}>{task.name}</div>
+        )}
+      </b>
+      <pre
+        className={styles.tooltipDefaultContainerParagraph}
+      >{`${task.start.getDate()}.${
         task.start.getMonth() + 1
       }.${task.start.getFullYear()} - ${task.end.getDate()}.${
         task.end.getMonth() + 1
