@@ -1,12 +1,22 @@
 import React from "react";
+import cx from "classnames";
+
+import { BarRelationHandle } from "../bar/bar-relation-handle";
+import stylesRelationHandle from "../bar/bar-relation-handle.module.css";
 import { TaskItemProps } from "../task-item";
 import styles from "./milestone.module.css";
 import { useProvideChipColors } from "../../task-list/useProvideChipColors";
 
 export const Milestone: React.FC<TaskItemProps> = ({
   task,
+  taskHalfHeight,
+  relationCircleOffset,
+  relationCircleRadius,
   isDateChangeable,
+  isRelationChangeable,
+  isRelationDrawMode,
   onEventStart,
+  onRelationStart,
   isSelected,
 }) => {
   const { resolveChipColor, resolveChipLabelColor } = useProvideChipColors();
@@ -19,7 +29,13 @@ export const Milestone: React.FC<TaskItemProps> = ({
   };
 
   return (
-    <g tabIndex={0} className={styles.milestoneWrapper}>
+    <g
+      tabIndex={0}
+      className={cx(
+        styles.milestoneWrapper,
+        stylesRelationHandle.barRelationHandleWrapper
+      )}
+    >
       <rect
         fill={getBarColor()}
         x={task.x1}
@@ -34,6 +50,33 @@ export const Milestone: React.FC<TaskItemProps> = ({
           isDateChangeable && onEventStart("move", task, e);
         }}
       />
+
+      <g className="handleGroup">
+        {isRelationChangeable && (
+          <g>
+            {/* left */}
+            <BarRelationHandle
+              isRelationDrawMode={isRelationDrawMode}
+              x={task.x1 - relationCircleOffset}
+              y={task.y + taskHalfHeight}
+              radius={relationCircleRadius}
+              onMouseDown={() => {
+                onRelationStart("startOfTask", task);
+              }}
+            />
+            {/* right */}
+            <BarRelationHandle
+              isRelationDrawMode={isRelationDrawMode}
+              x={task.x2 + relationCircleOffset}
+              y={task.y + taskHalfHeight}
+              radius={relationCircleRadius}
+              onMouseDown={() => {
+                onRelationStart("endOfTask", task);
+              }}
+            />
+          </g>
+        )}
+      </g>
     </g>
   );
 };

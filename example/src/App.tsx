@@ -1,5 +1,5 @@
 import React from "react";
-import { Task, ViewMode, Gantt } from "gantt-task-react";
+import { Task, ViewMode, Gantt, OnRelationChange } from "gantt-task-react";
 import { ViewSwitcher } from "./components/view-switcher";
 import { getStartEndDateForProject } from "./helper";
 import "gantt-task-react/dist/index.css";
@@ -154,6 +154,75 @@ const App = () => {
     setTasks(newTasks);
   };
 
+  const handleRelationChange: OnRelationChange = (
+    [taskFrom, targetFrom],
+    [taskTo]
+  ) => {
+    setTasks(
+      tasks.map(t => {
+        if (targetFrom === "startOfTask") {
+          if (t.id === taskFrom.id) {
+            if (!t.dependencies) {
+              return {
+                ...t,
+                dependencies: [taskTo.id],
+              };
+            }
+
+            const hasDependency = t.dependencies.some(
+              dependencyId => dependencyId === taskTo.id
+            );
+
+            if (hasDependency) {
+              return {
+                ...t,
+                dependencies: t.dependencies.filter(
+                  dependencyId => dependencyId !== taskTo.id
+                ),
+              };
+            }
+
+            return {
+              ...t,
+              dependencies: [...t.dependencies, taskTo.id],
+            };
+          }
+        }
+
+        if (targetFrom === "endOfTask") {
+          if (t.id === taskTo.id) {
+            if (!t.dependencies) {
+              return {
+                ...t,
+                dependencies: [taskFrom.id],
+              };
+            }
+
+            const hasDependency = t.dependencies.some(
+              dependencyId => dependencyId === taskFrom.id
+            );
+
+            if (hasDependency) {
+              return {
+                ...t,
+                dependencies: t.dependencies.filter(
+                  dependencyId => dependencyId !== taskFrom.id
+                ),
+              };
+            }
+
+            return {
+              ...t,
+              dependencies: [...t.dependencies, taskFrom.id],
+            };
+          }
+        }
+
+        return t;
+      })
+    );
+  };
+
   const handleTaskDelete = (task: Task) => {
     const conf = window.confirm("Are you sure about " + task.name + " ?");
     if (conf) {
@@ -199,6 +268,7 @@ const App = () => {
         onDateChange={handleTaskChange}
         onDelete={handleTaskDelete}
         onProgressChange={handleProgressChange}
+        onRelationChange={handleRelationChange}
         onDoubleClick={handleDblClick}
         onClick={handleClick}
         onSelect={handleSelect}
@@ -214,6 +284,7 @@ const App = () => {
         onDateChange={handleTaskChange}
         onDelete={handleTaskDelete}
         onProgressChange={handleProgressChange}
+        onRelationChange={handleRelationChange}
         onDoubleClick={handleDblClick}
         onClick={handleClick}
         onSelect={handleSelect}

@@ -1,7 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { EventOption } from "../../types/public-types";
 import { BarTask } from "../../types/bar-task";
 import { Arrow } from "../other/arrow";
+import { RelationLine } from "../other/relation-line";
+import { getRelationCircleByCoordinates } from "../../helpers/get-relation-circle-by-coordinates";
 import { handleTaskBySVGMouseEvent } from "../../helpers/bar-helper";
 import { isKeyboardEvent } from "../../helpers/other-helper";
 import { TaskItem } from "../task-item/task-item";
@@ -9,12 +11,15 @@ import {
   BarMoveAction,
   GanttContentMoveAction,
   GanttEvent,
+  GanttRelationEvent,
+  RelationMoveTarget,
 } from "../../types/gantt-task-actions";
 
 export type TaskGanttContentProps = {
   tasks: BarTask[];
   dates: Date[];
   ganttEvent: GanttEvent;
+  ganttRelationEvent: GanttRelationEvent | null;
   selectedTask: BarTask | undefined;
   rowHeight: number;
   columnWidth: number;
@@ -22,12 +27,18 @@ export type TaskGanttContentProps = {
   svg?: React.RefObject<SVGSVGElement>;
   svgWidth: number;
   taskHeight: number;
+  taskHalfHeight: number;
+  relationCircleOffset: number;
+  relationCircleRadius: number;
   arrowColor: string;
   arrowIndent: number;
   fontSize: string;
   fontFamily: string;
   rtl: boolean;
   setGanttEvent: (value: GanttEvent) => void;
+  setGanttRelationEvent: React.Dispatch<
+    React.SetStateAction<GanttRelationEvent | null>
+  >;
   setFailedTask: (value: BarTask | null) => void;
   setSelectedTask: (taskId: string) => void;
 } & EventOption;
@@ -36,21 +47,27 @@ export const TaskGanttContent: React.FC<TaskGanttContentProps> = ({
   tasks,
   dates,
   ganttEvent,
+  ganttRelationEvent,
   selectedTask,
   rowHeight,
   columnWidth,
   timeStep,
   svg,
   taskHeight,
+  taskHalfHeight,
+  relationCircleOffset,
+  relationCircleRadius,
   arrowColor,
   arrowIndent,
   fontFamily,
   fontSize,
   rtl,
   setGanttEvent,
+  setGanttRelationEvent,
   setFailedTask,
   setSelectedTask,
   onDateChange,
+  onRelationChange,
   onProgressChange,
   onDoubleClick,
   onClick,
@@ -192,6 +209,108 @@ export const TaskGanttContent: React.FC<TaskGanttContentProps> = ({
     setGanttEvent,
   ]);
 
+  const startRelationTarget = ganttRelationEvent?.target;
+  const startRelationTask = ganttRelationEvent?.task;
+
+  /**
+   * Drag arrow
+   */
+  useEffect(() => {
+    if (!onRelationChange || !startRelationTarget || !startRelationTask) {
+      return undefined;
+    }
+
+    const svgNode = svg?.current;
+
+    if (!svgNode) {
+      return undefined;
+    }
+
+    if (!point) {
+      return undefined;
+    }
+
+    const handleMouseMove = (event: MouseEvent) => {
+      const { clientX, clientY } = event;
+
+      point.x = clientX;
+      point.y = clientY;
+
+      const ctm = svgNode.getScreenCTM();
+
+      if (!ctm) {
+        return;
+      }
+
+      const svgP = point.matrixTransform(ctm.inverse());
+
+      setGanttRelationEvent(prevValue => {
+        if (!prevValue) {
+          return null;
+        }
+
+        return {
+          ...prevValue,
+          endX: svgP.x,
+          endY: svgP.y,
+        };
+      });
+    };
+
+    const handleMouseUp = (event: MouseEvent) => {
+      const { clientX, clientY } = event;
+
+      point.x = clientX;
+      point.y = clientY;
+
+      const ctm = svgNode.getScreenCTM();
+
+      if (!ctm) {
+        return;
+      }
+
+      const svgP = point.matrixTransform(ctm.inverse());
+
+      const endTargetRelationCircle = getRelationCircleByCoordinates(
+        svgP,
+        tasks,
+        taskHalfHeight,
+        relationCircleOffset,
+        relationCircleRadius,
+        rtl
+      );
+
+      if (endTargetRelationCircle) {
+        onRelationChange(
+          [startRelationTask, startRelationTarget],
+          endTargetRelationCircle
+        );
+      }
+
+      setGanttRelationEvent(null);
+    };
+
+    svgNode.addEventListener("mousemove", handleMouseMove);
+    svgNode.addEventListener("mouseup", handleMouseUp);
+
+    return () => {
+      svgNode.removeEventListener("mousemove", handleMouseMove);
+      svgNode.removeEventListener("mouseup", handleMouseUp);
+    };
+  }, [
+    svg,
+    rtl,
+    point,
+    startRelationTarget,
+    startRelationTask,
+    setGanttRelationEvent,
+    tasks,
+    taskHalfHeight,
+    relationCircleOffset,
+    relationCircleRadius,
+    onRelationChange,
+  ]);
+
   /**
    * Method is Start point of task change
    */
@@ -260,6 +379,24 @@ export const TaskGanttContent: React.FC<TaskGanttContentProps> = ({
     }
   };
 
+  const handleBarRelationStart = useCallback(
+    (target: RelationMoveTarget, task: BarTask) => {
+      const startX =
+        (target === "startOfTask") !== rtl ? task.x1 - 10 : task.x2 + 10;
+      const startY = task.y + Math.round(task.height / 2);
+
+      setGanttRelationEvent({
+        target,
+        task,
+        startX,
+        startY,
+        endX: startX,
+        endY: startY,
+      });
+    },
+    [setGanttRelationEvent, rtl]
+  );
+
   return (
     <g className="content">
       <g className="arrows" fill={arrowColor} stroke={arrowColor}>
@@ -286,10 +423,16 @@ export const TaskGanttContent: React.FC<TaskGanttContentProps> = ({
               task={task}
               arrowIndent={arrowIndent}
               taskHeight={taskHeight}
+              taskHalfHeight={taskHalfHeight}
+              relationCircleOffset={relationCircleOffset}
+              relationCircleRadius={relationCircleRadius}
+              isRelationDrawMode={Boolean(ganttRelationEvent)}
               isProgressChangeable={!!onProgressChange && !task.isDisabled}
               isDateChangeable={!!onDateChange && !task.isDisabled}
+              isRelationChangeable={!!onRelationChange && !task.isDisabled}
               isDelete={!task.isDisabled}
               onEventStart={handleBarEventStart}
+              onRelationStart={handleBarRelationStart}
               key={task.id}
               isSelected={!!selectedTask && task.id === selectedTask.id}
               rtl={rtl}
@@ -297,6 +440,14 @@ export const TaskGanttContent: React.FC<TaskGanttContentProps> = ({
           );
         })}
       </g>
+      {ganttRelationEvent && (
+        <RelationLine
+          x1={ganttRelationEvent.startX}
+          x2={ganttRelationEvent.endX}
+          y1={ganttRelationEvent.startY}
+          y2={ganttRelationEvent.endY}
+        />
+      )}
     </g>
   );
 };

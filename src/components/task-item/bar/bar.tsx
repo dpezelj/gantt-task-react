@@ -1,7 +1,10 @@
-import React from "react";
+import React, { useCallback } from "react";
+
+import cx from "classnames";
 import { getProgressPoint } from "../../../helpers/bar-helper";
 import { BarDisplay } from "./bar-display";
 import { BarDateHandle } from "./bar-date-handle";
+import { BarRelationHandle } from "./bar-relation-handle";
 import { BarProgressHandle } from "./bar-progress-handle";
 import { TaskItemProps } from "../task-item";
 import styles from "./bar.module.css";
@@ -13,6 +16,7 @@ import {
   Typography,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
+import stylesRelationHandle from "./bar-relation-handle.module.css";
 
 export const HtmlTooltip = styled(({ className, ...props }: TooltipProps) => (
   <Tooltip {...props} classes={{ popper: className }} />
@@ -28,13 +32,28 @@ export const HtmlTooltip = styled(({ className, ...props }: TooltipProps) => (
 
 export const Bar: React.FC<TaskItemProps> = ({
   task,
+  taskHalfHeight,
+  relationCircleOffset,
+  relationCircleRadius,
   isProgressChangeable,
   isDateChangeable,
+  isRelationChangeable,
+  isRelationDrawMode,
   rtl,
   onEventStart,
+  onRelationStart,
   isSelected,
 }) => {
   const { resolveChipColor, resolveChipLabelColor } = useProvideChipColors();
+
+  const onLeftRelationTriggerMouseDown = useCallback(() => {
+    onRelationStart(rtl ? "endOfTask" : "startOfTask", task);
+  }, [onRelationStart, rtl, task]);
+
+  const onRightRelationTriggerMouseDown = useCallback(() => {
+    onRelationStart(rtl ? "startOfTask" : "endOfTask", task);
+  }, [onRelationStart, rtl, task]);
+
   const progressPoint = getProgressPoint(
     +!rtl * task.progressWidth + task.progressX,
     task.y,
@@ -48,7 +67,7 @@ export const Bar: React.FC<TaskItemProps> = ({
   };
   return (
     <HtmlTooltip
-    placement="bottom-start"
+      placement="bottom-start"
       title={
         <React.Fragment>
           <Typography
@@ -78,7 +97,13 @@ export const Bar: React.FC<TaskItemProps> = ({
         </React.Fragment>
       }
     >
-      <g className={styles.barWrapper} tabIndex={0}>
+      <g
+        className={cx(
+          styles.barWrapper,
+          stylesRelationHandle.barRelationHandleWrapper
+        )}
+        tabIndex={0}
+      >
         <BarDisplay
           x={task.x1}
           y={task.y + 2}
@@ -117,6 +142,26 @@ export const Bar: React.FC<TaskItemProps> = ({
                 onMouseDown={e => {
                   onEventStart("end", task, e);
                 }}
+              />
+            </g>
+          )}
+          {isRelationChangeable && (
+            <g>
+              {/* left */}
+              <BarRelationHandle
+                isRelationDrawMode={isRelationDrawMode}
+                x={task.x1 - relationCircleOffset}
+                y={task.y + taskHalfHeight}
+                radius={relationCircleRadius}
+                onMouseDown={onLeftRelationTriggerMouseDown}
+              />
+              {/* right */}
+              <BarRelationHandle
+                isRelationDrawMode={isRelationDrawMode}
+                x={task.x2 + relationCircleOffset}
+                y={task.y + taskHalfHeight}
+                radius={relationCircleRadius}
+                onMouseDown={onRightRelationTriggerMouseDown}
               />
             </g>
           )}

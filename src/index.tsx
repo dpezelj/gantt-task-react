@@ -6,4 +6,7 @@ export type {
   StylingOption,
   DisplayOption,
   EventOption,
+  OnRelationChange,
 } from "./types/public-types";
+
+export type { RelationMoveTarget } from "./types/gantt-task-actions";

@@ -50,6 +50,7 @@ export const Project: React.FC<TaskItemProps> = ({ task /* isSelected */ }) => {
                 whiteSpace: "nowrap",
                 overflow: "hidden",
                 textOverflow: "ellipsis",
+                textAlign: "center",
               }}
             >
               {task.name}
