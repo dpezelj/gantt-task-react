@@ -68,6 +68,7 @@ export const Bar: React.FC<TaskItemProps> = ({
   return (
     <HtmlTooltip
       placement="bottom-start"
+      followCursor
       title={
         <React.Fragment>
           <Typography

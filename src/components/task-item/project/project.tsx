@@ -33,6 +33,7 @@ export const Project: React.FC<TaskItemProps> = ({ task /* isSelected */ }) => {
  */
   return (
     <HtmlTooltip
+      followCursor
       title={
         <React.Fragment>
           <div style={{ margin: "auto" }}>
