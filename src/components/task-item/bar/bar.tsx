@@ -6,6 +6,25 @@ import { BarProgressHandle } from "./bar-progress-handle";
 import { TaskItemProps } from "../task-item";
 import styles from "./bar.module.css";
 import { useProvideChipColors } from "../../task-list/useProvideChipColors";
+import {
+  Tooltip,
+  tooltipClasses,
+  TooltipProps,
+  Typography,
+} from "@mui/material";
+import { styled } from "@mui/material/styles";
+
+export const HtmlTooltip = styled(({ className, ...props }: TooltipProps) => (
+  <Tooltip {...props} classes={{ popper: className }} />
+))(() => ({
+  [`& .${tooltipClasses.tooltip}`]: {
+    color: "#666",
+    background: "#fff",
+    padding: "1rem",
+    borderRadius: "1rem",
+    boxShadow: "0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23)",
+  },
+}));
 
 export const Bar: React.FC<TaskItemProps> = ({
   task,
@@ -28,57 +47,89 @@ export const Bar: React.FC<TaskItemProps> = ({
     backgroundSelectedColor: resolveChipColor(task.color, "test") || "#ededed",
   };
   return (
-    <g className={styles.barWrapper} tabIndex={0}>
-      <BarDisplay
-        x={task.x1}
-        y={task.y+2}
-        width={task.x2 - task.x1}
-        height={15}
-        progressX={task.progressX}
-        progressWidth={0} //HARDCODED TO FULL COLOR THE TASK BAR
-        barCornerRadius={task.barCornerRadius}
-        styles={taskStyle}
-        isSelected={isSelected}
-        onMouseDown={e => {
-          isDateChangeable && onEventStart("move", task, e);
-        }}
-      />
-      <g className="handleGroup">
-        {isDateChangeable && (
-          <g>
-            {/* left */}
-            <BarDateHandle
-              x={task.x1 + 1}
-              y={task.y + 1}
-              width={task.handleWidth}
-              height={handleHeight}
-              barCornerRadius={task.barCornerRadius}
+    <HtmlTooltip
+    placement="bottom-start"
+      title={
+        <React.Fragment>
+          <Typography
+            style={{ textAlign: "center", color: "black", fontSize: "14px" }}
+          >
+            <div style={{ margin: "auto" }}>{task.name}</div>
+          </Typography>
+          <pre
+            className={styles.tooltipDefaultContainerParagraph}
+          >{`${task.start.getDate()}.${
+            task.start.getMonth() + 1
+          }.${task.start.getFullYear()} - ${task.end.getDate()}.${
+            task.end.getMonth() + 1
+          }.${task.end.getFullYear()}`}</pre>
+          {task.end.getTime() - task.start.getTime() !== 0 && (
+            <p
+              className={styles.tooltipDefaultContainerParagraph}
+            >{`Duration: ${~~(
+              (task.end.getTime() - task.start.getTime()) /
+              (1000 * 60 * 60 * 24)
+            )} day(s)`}</p>
+          )}
+
+          <p className={styles.tooltipDefaultContainerParagraph}>
+            {!!task.progress && `Progress: ${task.progress} %`}
+          </p>
+        </React.Fragment>
+      }
+    >
+      <g className={styles.barWrapper} tabIndex={0}>
+        <BarDisplay
+          x={task.x1}
+          y={task.y + 2}
+          width={task.x2 - task.x1}
+          height={15}
+          progressX={task.progressX}
+          progressWidth={0} //HARDCODED TO FULL COLOR THE TASK BAR
+          barCornerRadius={task.barCornerRadius}
+          styles={taskStyle}
+          isSelected={isSelected}
+          onMouseDown={e => {
+            isDateChangeable && onEventStart("move", task, e);
+          }}
+        />
+        <g className="handleGroup">
+          {isDateChangeable && (
+            <g>
+              {/* left */}
+              <BarDateHandle
+                x={task.x1 + 1}
+                y={task.y + 1}
+                width={task.handleWidth}
+                height={handleHeight}
+                barCornerRadius={task.barCornerRadius}
+                onMouseDown={e => {
+                  onEventStart("start", task, e);
+                }}
+              />
+              {/* right */}
+              <BarDateHandle
+                x={task.x2 - task.handleWidth - 1}
+                y={task.y + 1}
+                width={task.handleWidth}
+                height={handleHeight}
+                barCornerRadius={task.barCornerRadius}
+                onMouseDown={e => {
+                  onEventStart("end", task, e);
+                }}
+              />
+            </g>
+          )}
+          {isProgressChangeable && (
+            <BarProgressHandle
+              progressPoint={progressPoint}
               onMouseDown={e => {
-                onEventStart("start", task, e);
+                onEventStart("progress", task, e);
               }}
             />
-            {/* right */}
-            <BarDateHandle
-              x={task.x2 - task.handleWidth - 1}
-              y={task.y + 1}
-              width={task.handleWidth}
-              height={handleHeight}
-              barCornerRadius={task.barCornerRadius}
-              onMouseDown={e => {
-                onEventStart("end", task, e);
-              }}
-            />
-          </g>
-        )}
-        {isProgressChangeable && (
-          <BarProgressHandle
-            progressPoint={progressPoint}
-            onMouseDown={e => {
-              onEventStart("progress", task, e);
-            }}
-          />
-        )}
+          )}
+        </g>
       </g>
-    </g>
+    </HtmlTooltip>
   );
 };

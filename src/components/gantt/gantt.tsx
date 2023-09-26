@@ -12,7 +12,7 @@ import { CalendarProps } from "../calendar/calendar";
 import { TaskGanttContentProps } from "./task-gantt-content";
 import { TaskListHeaderDefault } from "../task-list/task-list-header";
 import { TaskListTableDefault } from "../task-list/task-list-table";
-import { StandardTooltipContent, Tooltip } from "../other/tooltip";
+/* import { StandardTooltipContent  Tooltip } from "../other/tooltip"; */
 import { VerticalScroll } from "../other/vertical-scroll";
 import { TaskListProps, TaskList } from "../task-list/task-list";
 import { TaskGantt } from "./task-gantt";
@@ -23,6 +23,7 @@ import { DateSetup } from "../../types/date-setup";
 /* import { HorizontalScroll } from "../other/horizontal-scroll"; */
 import { removeHiddenTasks, sortTasks } from "../../helpers/other-helper";
 import styles from "./gantt.module.css";
+/* import { HorizontalScroll } from "../other/horizontal-scroll"; */
 
 export const Gantt: React.FunctionComponent<GanttProps> = ({
   tasks,
@@ -55,7 +56,7 @@ export const Gantt: React.FunctionComponent<GanttProps> = ({
   arrowIndent = 20,
   todayColor = "rgba(252, 248, 227, 0.5)",
   viewDate,
-  TooltipContent = StandardTooltipContent,
+/*   TooltipContent = StandardTooltipContent, */
   TaskListHeader = TaskListHeaderDefault,
   TaskListTable = TaskListTableDefault,
   onDateChange,
@@ -76,9 +77,9 @@ export const Gantt: React.FunctionComponent<GanttProps> = ({
     undefined
   );
 
-  const [taskListWidth, setTaskListWidth] = useState(0);
-  const [svgContainerWidth, setSvgContainerWidth] = useState(0);
-  const [svgContainerHeight, setSvgContainerHeight] = useState(ganttHeight);
+/*   const [taskListWidth, setTaskListWidth] = useState(0); */
+/*   const [svgContainerWidth, setSvgContainerWidth] = useState(0);
+  const [svgContainerHeight, setSvgContainerHeight] = useState(ganttHeight); */
   const [barTasks, setBarTasks] = useState<BarTask[]>([]);
   const [ganttEvent, setGanttEvent] = useState<GanttEvent>({
     action: "",
@@ -231,16 +232,16 @@ export const Gantt: React.FunctionComponent<GanttProps> = ({
     }
   }, [failedTask, barTasks]);
 
-  useEffect(() => {
+/*   useEffect(() => {
     if (!listCellWidth) {
       setTaskListWidth(0);
     }
     if (taskListRef.current) {
       setTaskListWidth(taskListRef.current.offsetWidth);
     }
-  }, [taskListRef, listCellWidth]);
+  }, [taskListRef, listCellWidth]); */
 
-  useEffect(() => {
+/*   useEffect(() => {
     if (wrapperRef.current) {
       setSvgContainerWidth(wrapperRef.current.offsetWidth - taskListWidth);
     }
@@ -252,7 +253,7 @@ export const Gantt: React.FunctionComponent<GanttProps> = ({
     } else {
       setSvgContainerHeight(tasks.length * rowHeight + headerHeight);
     }
-  }, [ganttHeight, tasks, headerHeight, rowHeight]);
+  }, [ganttHeight, tasks, headerHeight, rowHeight]); */
 
   // scroll events
   useEffect(() => {
@@ -309,14 +310,14 @@ export const Gantt: React.FunctionComponent<GanttProps> = ({
     }
   };
 
-/*   const handleScrollX = (event: SyntheticEvent<HTMLDivElement>) => {
+/*    const handleScrollX = (event: SyntheticEvent<HTMLDivElement>) => {
     if (scrollX !== event.currentTarget.scrollLeft && !ignoreScrollEvent) {
       setScrollX(event.currentTarget.scrollLeft);
       setIgnoreScrollEvent(true);
     } else {
       setIgnoreScrollEvent(false);
     }
-  }; */
+  };  */
 
   /**
    * Handles arrow keys events and transform it to new scroll
@@ -467,7 +468,7 @@ export const Gantt: React.FunctionComponent<GanttProps> = ({
           scrollY={scrollY}
           scrollX={scrollX}
         />
-        {ganttEvent.changedTask && (
+        {/* {ganttEvent.changedTask && (
           <Tooltip
             arrowIndent={arrowIndent}
             rowHeight={rowHeight}
@@ -484,7 +485,7 @@ export const Gantt: React.FunctionComponent<GanttProps> = ({
             rtl={rtl}
             svgWidth={svgWidth}
           />
-        )}
+        )} */}
         <VerticalScroll
           ganttFullHeight={ganttFullHeight}
           ganttHeight={ganttHeight}
@@ -494,7 +495,7 @@ export const Gantt: React.FunctionComponent<GanttProps> = ({
           rtl={rtl}
         />
       </div>
-      {/* <HorizontalScroll
+       {/* <HorizontalScroll
         svgWidth={svgWidth}
         taskListWidth={taskListWidth}
         scroll={scrollX}
