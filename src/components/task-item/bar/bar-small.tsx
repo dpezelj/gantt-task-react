@@ -4,6 +4,7 @@ import { BarDisplay } from "./bar-display";
 import { BarProgressHandle } from "./bar-progress-handle";
 import { TaskItemProps } from "../task-item";
 import styles from "./bar.module.css";
+import { useProvideChipColors } from "../../task-list/useProvideChipColors";
 
 export const BarSmall: React.FC<TaskItemProps> = ({
   task,
@@ -12,11 +13,19 @@ export const BarSmall: React.FC<TaskItemProps> = ({
   onEventStart,
   isSelected,
 }) => {
+  const { resolveChipColor, resolveChipLabelColor } = useProvideChipColors();
+
   const progressPoint = getProgressPoint(
     task.progressWidth + task.x1,
     task.y,
     task.height
   );
+
+  const taskStyle = {
+    ...task.styles,
+    backgroundColor: resolveChipLabelColor(task.color, "test") || "#ededed",
+    backgroundSelectedColor: resolveChipColor(task.color, "test") || "#ededed",
+  };
   return (
     <g className={styles.barWrapper} tabIndex={0}>
       <BarDisplay
@@ -27,13 +36,13 @@ export const BarSmall: React.FC<TaskItemProps> = ({
         progressX={task.progressX}
         progressWidth={task.progressWidth}
         barCornerRadius={task.barCornerRadius}
-        styles={task.styles}
+        styles={taskStyle}
         isSelected={isSelected}
         onMouseDown={e => {
           isDateChangeable && onEventStart("move", task, e);
         }}
       />
-      <g className="handleGroup">
+      {/* <g className="handleGroup">
         {isProgressChangeable && (
           <BarProgressHandle
             progressPoint={progressPoint}
@@ -42,7 +51,7 @@ export const BarSmall: React.FC<TaskItemProps> = ({
             }}
           />
         )}
-      </g>
+      </g> */}
     </g>
   );
 };
