@@ -55,9 +55,9 @@ export const TaskItem: React.FC<TaskItemProps> = props => {
       case "project":
         setTaskItem(<Project {...props} />);
         break;
-      case "smalltask":
+      /* case "smalltask":
         setTaskItem(<BarSmall {...props} />);
-        break;
+        break; */
       default:
         setTaskItem(<Bar {...props} />);
         break;

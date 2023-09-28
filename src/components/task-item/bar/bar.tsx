@@ -44,6 +44,8 @@ export const Bar: React.FC<TaskItemProps> = ({
   onRelationStart,
   isSelected,
 }) => {
+  const x = false;
+
   const { resolveChipColor, resolveChipLabelColor } = useProvideChipColors();
 
   const onLeftRelationTriggerMouseDown = useCallback(() => {
@@ -166,14 +168,14 @@ export const Bar: React.FC<TaskItemProps> = ({
               />
             </g>
           )}
-          {/* {isProgressChangeable && (
+          {isProgressChangeable && x && (
             <BarProgressHandle
               progressPoint={progressPoint}
               onMouseDown={e => {
                 onEventStart("progress", task, e);
               }}
             />
-          )} */}
+          )}
         </g>
       </g>
     </HtmlTooltip>

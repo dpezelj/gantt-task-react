@@ -13,6 +13,7 @@ export const BarSmall: React.FC<TaskItemProps> = ({
   onEventStart,
   isSelected,
 }) => {
+  const x = false;
   const { resolveChipColor, resolveChipLabelColor } = useProvideChipColors();
 
   const progressPoint = getProgressPoint(
@@ -42,8 +43,8 @@ export const BarSmall: React.FC<TaskItemProps> = ({
           isDateChangeable && onEventStart("move", task, e);
         }}
       />
-      {/* <g className="handleGroup">
-        {isProgressChangeable && (
+      <g className="handleGroup">
+        {isProgressChangeable && x && (
           <BarProgressHandle
             progressPoint={progressPoint}
             onMouseDown={e => {
@@ -51,7 +52,7 @@ export const BarSmall: React.FC<TaskItemProps> = ({
             }}
           />
         )}
-      </g> */}
+      </g>
     </g>
   );
 };
