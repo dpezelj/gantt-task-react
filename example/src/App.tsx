@@ -160,6 +160,9 @@ const App = () => {
   ) => {
     setTasks(
       tasks.map(t => {
+        //If user connects arrow with project => return
+        if (taskTo.type === "project") return t;
+
         if (targetFrom === "startOfTask") {
           if (t.id === taskFrom.id) {
             if (!t.dependencies) {
