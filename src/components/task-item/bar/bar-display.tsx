@@ -40,10 +40,10 @@ export const BarDisplay: React.FC<BarDisplayProps> = ({
     return isSelected ? progressLinesBackground : progressLinesBackground;
   };
  */
-  const getBarColor = () => {
+  /*   const getBarColor = () => {
     return isSelected ? styles.backgroundSelectedColor : styles.backgroundColor;
   };
-
+ */
   return (
     <g onMouseDown={onMouseDown}>
       <rect
@@ -53,7 +53,7 @@ export const BarDisplay: React.FC<BarDisplayProps> = ({
         height={height}
         ry={barCornerRadius}
         rx={barCornerRadius}
-        fill={getBarColor()}
+        fill={styles.backgroundSelectedColor}
         className={style.barBackground}
       />
       <rect
@@ -63,7 +63,7 @@ export const BarDisplay: React.FC<BarDisplayProps> = ({
         height={height - 0.5}
         ry={barCornerRadius}
         rx={barCornerRadius}
-        fill="green"
+        fill={isSelected ? styles.backgroundColor : styles.backgroundColor}
       />
     </g>
   );
