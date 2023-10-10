@@ -13,6 +13,7 @@ export type GanttContentMoveAction =
 
 export type GanttEvent = {
   changedTask?: BarTask;
+  changedTasks?: BarTask[];
   originalSelectedTask?: BarTask;
   action: GanttContentMoveAction;
 };

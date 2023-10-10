@@ -208,10 +208,11 @@ export const Gantt: React.FunctionComponent<GanttProps> = ({
   ]);
 
   useEffect(() => {
-    const { changedTask, action } = ganttEvent;
+    const { changedTask, action, changedTasks } = ganttEvent;
     if (changedTask) {
       if (action === "delete") {
         setGanttEvent({ action: "" });
+
         setBarTasks(barTasks.filter(t => t.id !== changedTask.id));
       } else if (
         action === "move" ||
@@ -219,8 +220,8 @@ export const Gantt: React.FunctionComponent<GanttProps> = ({
         action === "start" ||
         action === "progress"
       ) {
-        const prevStateTask = barTasks.find(t => t.id === changedTask.id);
-        if (
+        /* const prevStateTask = barTasks.find(t => t.id === changedTask.id); */
+        /* if (
           prevStateTask &&
           (prevStateTask.start.getTime() !== changedTask.start.getTime() ||
             prevStateTask.end.getTime() !== changedTask.end.getTime() ||
@@ -230,11 +231,18 @@ export const Gantt: React.FunctionComponent<GanttProps> = ({
           const newTaskList = barTasks.map(t =>
             t.id === changedTask.id ? changedTask : t
           );
+
+          console.log("CHANGED TASKS", changedTasks);
+
           setBarTasks(newTaskList);
+        } */
+        if (changedTasks?.length !== 0 && changedTasks?.length !== undefined) {
+          setBarTasks(changedTasks);
+          console.log("BAR TASKS", barTasks);
         }
       }
     }
-  }, [ganttEvent, barTasks]);
+  }, [barTasks, ganttEvent]);
 
   useEffect(() => {
     if (failedTask) {

@@ -134,8 +134,9 @@ const App = () => {
   } else if (view === ViewMode.Week) {
     columnWidth = 250;
   }
-
+  console.log("TASKS APP", tasks);
   const handleTaskChange = (task: Task) => {
+    console.log("APP TSX TASKS", tasks);
     console.log("On date change Id:" + task.id);
     let newTasks = tasks.map(t => (t.id === task.id ? task : t));
     if (task.project) {

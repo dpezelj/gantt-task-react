@@ -61,7 +61,7 @@ export const TaskItem: React.FC<TaskItemProps> = props => {
         setTaskItem(<Bar {...props} />);
         break;
     }
-  }, [task, isSelected, isRelationDrawMode]);
+  }, [task, isSelected, isRelationDrawMode, props]);
 
   useEffect(() => {
     if (textRef.current) {

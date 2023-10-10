@@ -78,6 +78,8 @@ export const TaskGanttContent: React.FC<TaskGanttContentProps> = ({
   const [initEventX1Delta, setInitEventX1Delta] = useState(0);
   const [isMoving, setIsMoving] = useState(false);
 
+  /* const allBarChildren: BarTask[] = getAllBarChildren(ganttEvent.changedTask);
+  console.log(allBarChildren); */
   // create xStep
   useEffect(() => {
     const dateDelta =
@@ -98,18 +100,20 @@ export const TaskGanttContent: React.FC<TaskGanttContentProps> = ({
       const cursor = point.matrixTransform(
         svg?.current.getScreenCTM()?.inverse()
       );
-
-      const { isChanged, changedTask } = handleTaskBySVGMouseEvent(
-        cursor.x,
-        ganttEvent.action as BarMoveAction,
-        ganttEvent.changedTask,
-        xStep,
-        timeStep,
-        initEventX1Delta,
-        rtl
-      );
+      console.log("TASKS:", tasks);
+      const { isChanged, changedTask, changedTasks } =
+        handleTaskBySVGMouseEvent(
+          cursor.x,
+          ganttEvent.action as BarMoveAction,
+          ganttEvent.changedTask,
+          tasks,
+          xStep,
+          timeStep,
+          initEventX1Delta,
+          rtl
+        );
       if (isChanged) {
-        setGanttEvent({ action: ganttEvent.action, changedTask });
+        setGanttEvent({ action: ganttEvent.action, changedTask, changedTasks });
       }
     };
 
@@ -123,10 +127,12 @@ export const TaskGanttContent: React.FC<TaskGanttContentProps> = ({
       const cursor = point.matrixTransform(
         svg?.current.getScreenCTM()?.inverse()
       );
+
       const { changedTask: newChangedTask } = handleTaskBySVGMouseEvent(
         cursor.x,
         action as BarMoveAction,
         changedTask,
+        tasks,
         xStep,
         timeStep,
         initEventX1Delta,
@@ -207,6 +213,7 @@ export const TaskGanttContent: React.FC<TaskGanttContentProps> = ({
     rtl,
     setFailedTask,
     setGanttEvent,
+    tasks,
   ]);
 
   const startRelationTarget = ganttRelationEvent?.target;
@@ -370,6 +377,8 @@ export const TaskGanttContent: React.FC<TaskGanttContentProps> = ({
         changedTask: task,
         originalSelectedTask: task,
       });
+      console.log(task);
+      console.log(tasks);
     } else {
       setGanttEvent({
         action,
@@ -451,3 +460,16 @@ export const TaskGanttContent: React.FC<TaskGanttContentProps> = ({
     </g>
   );
 };
+
+/* function getAllBarChildren(obj: BarTask | undefined) {
+  let barChildrenList: BarTask[] = [];
+
+  if (obj && obj.barChildren && obj.barChildren.length > 0) {
+    barChildrenList = barChildrenList.concat(obj.barChildren);
+    obj.barChildren.forEach(child => {
+      barChildrenList = barChildrenList.concat(getAllBarChildren(child));
+    });
+  }
+
+  return barChildrenList;
+} */
