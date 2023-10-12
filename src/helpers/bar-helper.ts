@@ -45,15 +45,21 @@ export const convertToBarTasks = (
       milestoneBackgroundSelectedColor
     );
   });
-
+  console.log("BARTASKS", barTasks);
   // set dependencies
-  barTasks = barTasks.map(task => {
+  barTasks = barTasks.map((task, index) => {
     const dependencies = task.dependencies || [];
     for (let j = 0; j < dependencies.length; j++) {
       const dependence = barTasks.findIndex(
         value => value.id === dependencies[j]
       );
-      if (dependence !== -1) barTasks[dependence].barChildren.push(task);
+      if (dependence !== -1) {
+        barTasks[dependence].barChildren.push(task);
+
+        task.offset = task.x1 - barTasks[index - 1].x2;
+      } else {
+        task.offset = 0;
+      }
     }
     return task;
   });
@@ -364,6 +370,23 @@ const moveByX = (x: number, xStep: number, task: BarTask) => {
   return [newX1, newX2];
 };
 
+const moveByXForEach = (
+  x: number,
+  xStep: number,
+  task: BarTask,
+  index: number
+) => {
+  const taskOffset = task.offset || 0;
+  console.log("OFFSET MOVE", task.offset);
+  const steps = Math.round((x - task.x1) / xStep);
+  const additionalXValue = steps * xStep;
+  const newX1Test =
+    index === 0 ? task.x1 + additionalXValue : task.x1 + taskOffset;
+  const newX2Test = newX1Test + task.x2 - task.x1;
+  console.log("TASK MOVEX", task.id, newX1Test, newX2Test);
+  return { newX1Test, newX2Test };
+};
+
 const dateByX = (
   x: number,
   taskX: number,
@@ -538,7 +561,9 @@ const handleTaskBySVGMouseEventForBar = (
         xStep,
         selectedTask
       );
+      console.log("MOVEX SELECTED", newMoveX1, newMoveX2);
       isChanged = newMoveX1 !== selectedTask.x1;
+      console.log("SELECTED T", selectedTask.x1);
       if (isChanged) {
         if (changedTask.barChildren.length !== 0) {
           /* const moveByX = (x: number, xStep: number, task: BarTask) => {
@@ -553,24 +578,31 @@ const handleTaskBySVGMouseEventForBar = (
 
           console.log(childrenIds);
           console.log(tasks);
-
-          tasks.forEach(task => {
+          //console.log("RTL", rtl);
+          tasks.forEach((task, index) => {
             if (childrenIds.includes(task.id)) {
-              const [newMoveX1, newMoveX2] = moveByX(
+              //const offset = task.x1 - tasks[index - 1].x2;
+              //console.log("OFFSET", offset);
+              const { newX1Test, newX2Test } = moveByXForEach(
                 svgX - initEventX1Delta,
                 xStep,
-                task
+                task,
+                index
+                /* changedTask.x2 - selectedTask.x1 */
               );
+              console.log("TESTING", task);
+              console.log("MOVEX", newX1Test, newX2Test);
+              //const taskOffset = task.offset || 0;
               task.start = dateByX(
-                newMoveX1,
+                newX1Test,
                 task.x1,
                 task.start,
                 xStep,
                 timeStep
               );
-              task.end = dateByX(newMoveX2, task.x2, task.end, xStep, timeStep);
-              task.x1 = newMoveX1;
-              task.x2 = newMoveX2;
+              task.end = dateByX(newX2Test, task.x2, task.end, xStep, timeStep);
+              task.x1 = newX1Test + (selectedTask.x1 - changedTask.x1);
+              task.x2 = newX2Test + (selectedTask.x2 - changedTask.x2);
               const [progressWidth, progressX] = progressWithByParams(
                 task.x1,
                 task.x2,
@@ -625,6 +657,7 @@ const handleTaskBySVGMouseEventForBar = (
           };
           updateAllChildren(changedTask); */
         } else {
+          console.log("OKIDA SE");
           changedTask.start = dateByX(
             newMoveX1,
             selectedTask.x1,
