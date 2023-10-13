@@ -47,7 +47,7 @@ export const convertToBarTasks = (
   });
   console.log("BARTASKS", barTasks);
   // set dependencies
-  barTasks = barTasks.map((task, index) => {
+  barTasks = barTasks.map(task => {
     const dependencies = task.dependencies || [];
     for (let j = 0; j < dependencies.length; j++) {
       const dependence = barTasks.findIndex(
@@ -56,7 +56,7 @@ export const convertToBarTasks = (
       if (dependence !== -1) {
         barTasks[dependence].barChildren.push(task);
 
-        task.offset = task.x1 - barTasks[index - 1].x2;
+        task.offset = task.x1 - barTasks[1].x1;
       } else {
         task.offset = 0;
       }
@@ -381,9 +381,13 @@ const moveByXForEach = (
   /*   tasks: BarTask[],
   index: number */
 ) => {
-  //const taskOffset = task.offset || 0;
+  const taskOffset = task.offset || 0;
+  const prevTaskOffset = t.offset || 0;
+
+  const finalOffset = taskOffset - prevTaskOffset;
   //const prevTaskOffset = tasks[index - 1].offset || 0;
   console.log("TESTING TSK", t.id, t.name, t.x1, t.x2, newMoveX1);
+  console.log("TESTING MOVE", t.name, t.x1, t.x2, task.name, task.x1);
   console.log("OFFSET MOVE", task.offset);
   //const calc = prevTask ? prevTask.x2 - prevTask.x1 : 0;
 
@@ -397,7 +401,7 @@ const moveByXForEach = (
     newMoveX1
   );
   console.log("POZIV");
-  const newX1Test = newMoveX1 + t.x2 - t.x1 + task.x1 - t.x2;
+  const newX1Test = newMoveX1 + Math.abs(finalOffset);
   const newX2Test = newX1Test + task.x2 - task.x1;
   console.log("TASK MOVEX", task.id, newX1Test, newX2Test);
   return { newX1Test, newX2Test };
@@ -582,147 +586,110 @@ const handleTaskBySVGMouseEventForBar = (
       console.log(changedTask);
       console.log("BAR CHILDRENS", childrens); */
       //console.log("BAR CHILDRENS NEW", getAllBarChildren(changedTask));
+
       const [newMoveX1, newMoveX2] = moveByX(
         svgX - initEventX1Delta,
         xStep,
         selectedTask
       );
-      console.log("MOVEX SELECTED", newMoveX1, newMoveX2);
       isChanged = newMoveX1 !== selectedTask.x1;
-      console.log("SELECTED T", selectedTask.x1);
       if (isChanged) {
-        if (changedTask.barChildren.length !== 0) {
-          /* const moveByX = (x: number, xStep: number, task: BarTask) => {
-            const steps = Math.round((x - task.x1) / xStep);
-            const additionalXValue = steps * xStep;
-            const newX1 = task.x1 + additionalXValue;
-            const newX2 = newX1 + task.x2 - task.x1;
-            return [newX1, newX2];
-          }; */
+        changedTask.start = dateByX(
+          newMoveX1,
+          selectedTask.x1,
+          selectedTask.start,
+          xStep,
+          timeStep
+        );
+        changedTask.end = dateByX(
+          newMoveX2,
+          selectedTask.x2,
+          selectedTask.end,
+          xStep,
+          timeStep
+        );
+        changedTask.x1 = newMoveX1;
+        changedTask.x2 = newMoveX2;
+        const [progressWidth, progressX] = progressWithByParams(
+          changedTask.x1,
+          changedTask.x2,
+          changedTask.progress,
+          rtl
+        );
+        changedTask.progressWidth = progressWidth;
+        changedTask.progressX = progressX;
 
+        const changedTasks: BarTask[] = [];
+
+        if (changedTask.barChildren.length !== 0) {
           const childrenIds = getAllBarChildrenIds(changedTask);
 
           console.log(childrenIds);
-          console.log(tasks);
+          console.log("TESTTASKS", tasks);
           //console.log("RTL", rtl);
-          const changedTasks = tasks.filter((task, index) => {
-            if (childrenIds.includes(task.id)) {
-              //const offset = task.x1 - tasks[index - 1].x2;
-              //console.log("OFFSET", offset);
-              const { newX1Test, newX2Test } = moveByXForEach(
-                svgX - initEventX1Delta,
-                xStep,
-                task,
-                newMoveX1,
-                index === 0 ? selectedTask : tasks[index - 1]
+          const tasksTest = tasks
+            .filter(t => childrenIds.includes(t.id))
+            .filter((task, index) => {
+              if (childrenIds.includes(task.id)) {
+                //const offset = task.x1 - tasks[index - 1].x2;
+                //console.log("OFFSET", offset);
 
-                /* tasks[index - 1] */
-                /*  svgX - task.x1 */
-                /* tasks,
+                console.log("OFFSETY", task.offset);
+
+                const { newX1Test, newX2Test } = moveByXForEach(
+                  svgX - initEventX1Delta,
+                  xStep,
+                  task,
+                  newMoveX1,
+                  index === 0 ? selectedTask : tasks[index - 1]
+
+                  /* tasks[index - 1] */
+                  /*  svgX - task.x1 */
+                  /* tasks,
                 index */
-                /* changedTask.x2 - selectedTask.x1 */
-              );
-              console.log("TESTING", task, childrenIds);
-              console.log("MOVEX", newX1Test, newX2Test);
-              //const taskOffset = task.offset || 0;
-              task.start = dateByX(
-                newX1Test,
-                task.x1,
-                task.start,
-                xStep,
-                timeStep
-              );
-              task.end = dateByX(newX2Test, task.x2, task.end, xStep, timeStep);
-              task.x1 = newX1Test;
-              task.x2 = newX2Test;
-              const [progressWidth, progressX] = progressWithByParams(
-                task.x1,
-                task.x2,
-                task.progress,
-                rtl
-              );
-              task.progressWidth = progressWidth;
-              task.progressX = progressX;
-              //changedTasks.push(task);
+                  /* changedTask.x2 - selectedTask.x1 */
+                );
+                console.log("TESTING", task, childrenIds);
+                console.log("MOVEX", newX1Test, newX2Test);
+                //const taskOffset = task.offset || 0;
+                task.start = dateByX(
+                  newX1Test,
+                  task.x1,
+                  task.start,
+                  xStep,
+                  timeStep
+                );
+                task.end = dateByX(
+                  newX2Test,
+                  task.x2,
+                  task.end,
+                  xStep,
+                  timeStep
+                );
+
+                task.x1 = newX1Test;
+                task.x2 = newX2Test;
+                const [progressWidth, progressX] = progressWithByParams(
+                  task.x1,
+                  task.x2,
+                  task.progress,
+                  rtl
+                );
+                task.progressWidth = progressWidth;
+                task.progressX = progressX;
+                changedTasks.push(task);
+                return task;
+              }
               return task;
-            }
-            return task;
-          });
-          console.log("UPDATED TASKS", changedTasks);
-          /*  const updateAllChildren = (task: BarTask) => {
-            const offset = changedTask.x1 - selectedTask.x1;
-            task.barChildren.forEach(taskToUpdate => {
-              const [newMoveX1, newMoveX2] = moveByX(
-                svgX - initEventX1Delta + offset,
-                xStep,
-                taskToUpdate
-              );
-              taskToUpdate.start = dateByX(
-                newMoveX1,
-                selectedTask.x1 + offset,
-                taskToUpdate.start,
-                xStep,
-                timeStep
-              );
-              taskToUpdate.end = dateByX(
-                newMoveX2,
-                selectedTask.x2 + offset,
-                taskToUpdate.end,
-                xStep,
-                timeStep
-              );
-              taskToUpdate.x1 = newMoveX1;
-              taskToUpdate.x2 = newMoveX2;
-              const [progressWidth, progressX] = progressWithByParams(
-                taskToUpdate.x1,
-                taskToUpdate.x2,
-                taskToUpdate.progress,
-                rtl
-              );
-              taskToUpdate.progressWidth = progressWidth;
-              taskToUpdate.progressX = progressX;
-
-              if (taskToUpdate.barChildren.length !== 0)
-                updateAllChildren(taskToUpdate);
-              return;
             });
-          };
-          updateAllChildren(changedTask); */
-        } else {
-          console.log("OKIDA SE");
-          changedTask.start = dateByX(
-            newMoveX1,
-            selectedTask.x1,
-            selectedTask.start,
-            xStep,
-            timeStep
-          );
-          changedTask.end = dateByX(
-            newMoveX2,
-            selectedTask.x2,
-            selectedTask.end,
-            xStep,
-            timeStep
-          );
-          changedTask.x1 = newMoveX1;
-          changedTask.x2 = newMoveX2;
-          const [progressWidth, progressX] = progressWithByParams(
-            changedTask.x1,
-            changedTask.x2,
-            changedTask.progress,
-            rtl
-          );
-          changedTask.progressWidth = progressWidth;
-          changedTask.progressX = progressX;
+
+          console.log("TESTTASKSTEST", tasksTest);
         }
-
-        /* if(changedTask.barChildren.length !== 0) {
-
-        } */
       }
       break;
     }
   }
+  console.log("CHANGED TASKS", changedTasks);
   return { isChanged, changedTask, changedTasks };
 };
 
