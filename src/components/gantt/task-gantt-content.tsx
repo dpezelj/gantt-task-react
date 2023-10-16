@@ -198,6 +198,7 @@ export const TaskGanttContent: React.FC<TaskGanttContentProps> = ({
     ) {
       svg.current.addEventListener("mousemove", handleMouseMove);
       svg.current.addEventListener("mouseup", handleMouseUp);
+
       setIsMoving(true);
     }
   }, [
