@@ -555,14 +555,10 @@ const handleTaskBySVGMouseEventForBar = (
       break;
     }
     case "move": {
+      //GET ARRAY OF DEPENDENT TASKS AND POP LAST ITEM TO SET MIN DATE RESTRICTION!
       const prevDependentTask = tasks
         .filter(item => selectedTask.dependencies?.includes(item.id))
         .pop();
-      //console.log("DEPENDENT TASKS", prevDependentTask.pop()?.x1);
-
-      /* const prevTaskIndex =
-        tasks.findIndex(task => task.id === selectedTask.id) - 1;
-      const prevTask = prevDependentTask.pop(); */
 
       const [newMoveX1, newMoveX2] = moveByX(
         svgX - initEventX1Delta,
