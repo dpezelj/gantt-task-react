@@ -370,7 +370,7 @@ const moveByX = (
   const steps = Math.round((x - task.x1) / xStep);
   const additionalXValue = steps * xStep;
   let newX1 = task.x1 + additionalXValue;
-  newX1 = prevTask ? (newX1 < prevTask.x1 ? prevTask.x1 : newX1) : newX1;
+  newX1 = prevTask ? (newX1 < prevTask.x2 ? prevTask.x2 : newX1) : newX1;
   const newX2 = newX1 + task.x2 - task.x1;
   //console.log("TASK MOVEX", task.id, newX1, newX2);
   return [newX1, newX2];
@@ -594,48 +594,49 @@ const handleTaskBySVGMouseEventForBar = (
         changedTask.progressWidth = progressWidth;
         changedTask.progressX = progressX;
 
-        const changedTasks: BarTask[] = [];
+        let changedTasks: BarTask[] = [];
 
-        if (changedTask.barChildren.length !== 0) {
-          const childrenIds = getAllBarChildrenIds(changedTask);
+        if (changedTask.barChildren.length === 0)
+          return { isChanged, changedTask, changedTasks };
 
-          tasks
-            .filter(t => childrenIds.includes(t.id))
-            .map(task => {
-              const { newX1Test, newX2Test } = moveByXForEach(
-                task,
-                newMoveX1,
-                selectedTask
-              );
+        const childrenIds = getAllBarChildrenIds(changedTask);
 
-              task.start = dateByX(
-                newX1Test,
-                task.x1,
-                task.start,
-                xStep,
-                timeStep
-              );
-              task.end = dateByX(newX2Test, task.x2, task.end, xStep, timeStep);
+        changedTasks = tasks
+          .filter(t => childrenIds.includes(t.id))
+          .map(task => {
+            const { newX1Test, newX2Test } = moveByXForEach(
+              task,
+              newMoveX1,
+              selectedTask
+            );
 
-              task.x1 = newX1Test;
-              task.x2 = newX2Test;
-              const [progressWidth, progressX] = progressWithByParams(
-                task.x1,
-                task.x2,
-                task.progress,
-                rtl
-              );
-              task.progressWidth = progressWidth;
-              task.progressX = progressX;
-              changedTasks.push(task);
-              return task;
-            });
-        }
+            task.start = dateByX(
+              newX1Test,
+              task.x1,
+              task.start,
+              xStep,
+              timeStep
+            );
+            task.end = dateByX(newX2Test, task.x2, task.end, xStep, timeStep);
+
+            task.x1 = newX1Test;
+            task.x2 = newX2Test;
+            const [progressWidth, progressX] = progressWithByParams(
+              task.x1,
+              task.x2,
+              task.progress,
+              rtl
+            );
+            task.progressWidth = progressWidth;
+            task.progressX = progressX;
+            changedTasks.push(task);
+            return task;
+          });
       }
-      break;
+      //break;
     }
   }
-
+  console.log("CHANGED TASKS", changedTasks);
   return { isChanged, changedTask, changedTasks };
 };
 
@@ -653,6 +654,7 @@ const handleTaskBySVGMouseEventForMilestone = (
   let isChanged = false;
   switch (action) {
     case "move": {
+      //fix
       const prevTaskIndex =
         tasks.findIndex(task => task.id === selectedTask.id) - 1;
       const prevTask = tasks[prevTaskIndex];
