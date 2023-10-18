@@ -227,17 +227,43 @@ export const Gantt: React.FunctionComponent<GanttProps> = ({
             prevStateTask.end.getTime() !== changedTask.end.getTime() ||
             prevStateTask.progress !== changedTask.progress)
         ) {
-          const newTaskList = barTasks.map(t =>
-            t.id === changedTask.id ? changedTask : t
-          );
-
           console.log("CHANGED TASKS", changedTasks);
 
-          setBarTasks(newTaskList);
-        }
-        if (changedTasks?.length !== 0 && changedTasks?.length !== undefined) {
-          setBarTasks(changedTasks);
-          console.log("BAR TASKS", barTasks);
+          if (
+            changedTasks?.length !== 0 &&
+            changedTasks?.length !== undefined
+          ) {
+            console.log("CHANGED TASKSTEST", changedTasks);
+
+            const mergedArray = barTasks.map(barTask => {
+              const changedItem = changedTasks.find(
+                item => item.id === barTask.id
+              );
+              console.log("CHITM", changedItem);
+              if (changedItem) {
+                console.log({
+                  ...barTask,
+                  ...changedItem,
+                  //offset: changedItem.x1 - barTasks[1].x1,
+                });
+                return {
+                  ...barTask,
+                  ...changedItem,
+                  //offset: changedItem.x1 - barTasks[1].x1,
+                };
+              } else {
+                return barTask;
+              }
+            });
+            setBarTasks(mergedArray);
+            //setBarTasks(changedTasks);
+            console.log("BAR TASKS", mergedArray);
+          } else {
+            const newTaskList = barTasks.map(t =>
+              t.id === changedTask.id ? changedTask : t
+            );
+            setBarTasks(newTaskList);
+          }
         }
       }
     }

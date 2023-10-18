@@ -1,3 +1,4 @@
+import { BarTask } from "./bar-task";
 import { RelationMoveTarget } from "./gantt-task-actions";
 
 export enum ViewMode {
@@ -23,6 +24,8 @@ export interface Task {
   name: string;
   start: Date;
   end: Date;
+  prevStart?: Date;
+  prevEnd?: Date;
   /**
    * From 0 to 100
    */
@@ -63,7 +66,8 @@ export interface EventOption {
    */
   onDateChange?: (
     task: Task,
-    children: Task[]
+    children: BarTask[],
+    changedTasks: BarTask[]
   ) => void | boolean | Promise<void> | Promise<boolean>;
 
   /**

@@ -113,6 +113,7 @@ export const TaskGanttContent: React.FC<TaskGanttContentProps> = ({
           rtl
         );
       if (isChanged) {
+        console.log("CHT", changedTask);
         setGanttEvent({ action: ganttEvent.action, changedTask, changedTasks });
       }
     };
@@ -128,20 +129,26 @@ export const TaskGanttContent: React.FC<TaskGanttContentProps> = ({
         svg?.current.getScreenCTM()?.inverse()
       );
 
-      const { changedTask: newChangedTask } = handleTaskBySVGMouseEvent(
-        cursor.x,
-        action as BarMoveAction,
-        changedTask,
-        tasks,
-        xStep,
-        timeStep,
-        initEventX1Delta,
-        rtl
-      );
+      /* changedTask.prevStart = tasks.find(
+        task => task.id === changedTask.id
+      )?.start;
+      changedTask.prevEnd = tasks.find(task => task.id === changedTask.id)?.end; */
+
+      const { changedTask: newChangedTask, changedTasks } =
+        handleTaskBySVGMouseEvent(
+          cursor.x,
+          action as BarMoveAction,
+          changedTask,
+          tasks,
+          xStep,
+          timeStep,
+          initEventX1Delta,
+          rtl
+        );
 
       const isNotLikeOriginal =
         originalSelectedTask.start !== newChangedTask.start ||
-        originalSelectedTask.end !== newChangedTask.end ||
+        originalSelectedTask.prevEnd !== newChangedTask.end ||
         originalSelectedTask.progress !== newChangedTask.progress;
 
       // remove listeners
@@ -149,23 +156,33 @@ export const TaskGanttContent: React.FC<TaskGanttContentProps> = ({
       svg.current.removeEventListener("mouseup", handleMouseUp);
       setGanttEvent({ action: "" });
       setIsMoving(false);
-
+      console.log("NCT", newChangedTask);
       // custom operation start
       let operationSuccess = true;
+      console.log(
+        "CONDITION",
+        originalSelectedTask.start,
+        newChangedTask.start
+      );
       if (
         (action === "move" || action === "end" || action === "start") &&
         onDateChange &&
         isNotLikeOriginal
       ) {
         try {
+          console.log("CODE0", newChangedTask);
           const result = await onDateChange(
             newChangedTask,
-            newChangedTask.barChildren
+            newChangedTask.barChildren,
+            changedTasks
           );
+          console.log("RESULT CONTENT", result);
           if (result !== undefined) {
+            console.log("SUCCESS");
             operationSuccess = result;
           }
         } catch (error) {
+          console.log("ERROR");
           operationSuccess = false;
         }
       } else if (onProgressChange && isNotLikeOriginal) {

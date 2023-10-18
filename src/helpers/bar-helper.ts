@@ -568,6 +568,8 @@ const handleTaskBySVGMouseEventForBar = (
       );
       isChanged = newMoveX1 !== selectedTask.x1;
       if (isChanged) {
+        console.log("IZVODI SE");
+
         changedTask.start = dateByX(
           newMoveX1,
           selectedTask.x1,
@@ -585,6 +587,9 @@ const handleTaskBySVGMouseEventForBar = (
 
         changedTask.x1 = newMoveX1;
         changedTask.x2 = newMoveX2;
+
+        //changedTask.offset = changedTask.x1 - tasks[1].x1;
+
         const [progressWidth, progressX] = progressWithByParams(
           changedTask.x1,
           changedTask.x2,
@@ -593,15 +598,13 @@ const handleTaskBySVGMouseEventForBar = (
         );
         changedTask.progressWidth = progressWidth;
         changedTask.progressX = progressX;
-
-        let changedTasks: BarTask[] = [];
-
-        if (changedTask.barChildren.length === 0)
-          return { isChanged, changedTask, changedTasks };
+        console.log("IZVODI SE", changedTask);
+        //if (changedTask.barChildren.length === 0)
+        //return { isChanged, changedTask, changedTasks };
 
         const childrenIds = getAllBarChildrenIds(changedTask);
-
-        changedTasks = tasks
+        //const copyTasks = tasks;
+        tasks
           .filter(t => childrenIds.includes(t.id))
           .map(task => {
             const { newX1Test, newX2Test } = moveByXForEach(
@@ -609,7 +612,6 @@ const handleTaskBySVGMouseEventForBar = (
               newMoveX1,
               selectedTask
             );
-
             task.start = dateByX(
               newX1Test,
               task.x1,
@@ -618,9 +620,10 @@ const handleTaskBySVGMouseEventForBar = (
               timeStep
             );
             task.end = dateByX(newX2Test, task.x2, task.end, xStep, timeStep);
-
+            //selectedTask.offset = selectedTask.x1 - tasks[1].x1;
             task.x1 = newX1Test;
             task.x2 = newX2Test;
+
             const [progressWidth, progressX] = progressWithByParams(
               task.x1,
               task.x2,
@@ -632,12 +635,25 @@ const handleTaskBySVGMouseEventForBar = (
             changedTasks.push(task);
             return task;
           });
+
+        /* tasks
+          .filter(task => selectedTask.id === task.id)
+          .map(
+            task =>
+              (task.offset =
+                selectedTask.offset || 0 + newMoveX1 - selectedTask.x1)
+          ); */
       }
       //break;
     }
   }
-  console.log("CHANGED TASKS", changedTasks);
-  return { isChanged, changedTask, changedTasks };
+  /*   console.log("CHANGED TASKS", {
+    isChanged,
+    changedTask: changedTask || selectedTask,
+    changedTasks,
+  }); */
+  console.log("CODE 1", changedTasks);
+  return { isChanged, changedTask: changedTask, changedTasks };
 };
 
 const handleTaskBySVGMouseEventForMilestone = (
