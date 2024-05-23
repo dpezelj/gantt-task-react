@@ -76,6 +76,22 @@ export const Calendar: React.FC<CalendarProps> = ({
     return [topValues, bottomValues];
   };
 
+  function getWeekNumber(d: Date): number {
+    // Copy date so don't modify original
+    d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+    // Set to nearest Thursday: current date + 4 - current day number
+    // Make Sunday's day number 7
+    d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
+    // Get first day of year
+    var yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+    // Calculate full weeks to nearest Thursday
+    var weekNo = Math.ceil(
+      ((d.getTime() - yearStart.getTime()) / 86400000 + 1) / 7
+    );
+    // Return array of year and week number
+    return weekNo;
+  }
+
   const getCalendarValuesForMonth = () => {
     const topValues: ReactChild[] = [];
     const bottomValues: ReactChild[] = [];
@@ -134,7 +150,7 @@ export const Calendar: React.FC<CalendarProps> = ({
         topValue = `${getLocaleMonth(date, locale)}, ${date.getFullYear()}`;
       }
       // bottom
-      const bottomValue = `W${getWeekNumberISO8601(date)}`;
+      const bottomValue = `WH ${getWeekNumberISO8601(date)}`;
 
       bottomValues.push(
         <text
@@ -170,15 +186,32 @@ export const Calendar: React.FC<CalendarProps> = ({
   };
 
   const getCalendarValuesForDay = () => {
-    const topValues: ReactChild[] = [];
-    const bottomValues: ReactChild[] = [];
+    const topValues = [];
+    const bottomValues = [];
+    const middleValues = [];
+
     const topDefaultHeight = headerHeight * 0.5;
     const dates = dateSetup.dates;
     for (let i = 0; i < dates.length; i++) {
       const date = dates[i];
+      const weekNumber = getWeekNumber(date);
+      const middleValue = `WH ${weekNumber}`;
       /* const bottomValue = `${getLocalDayOfWeek(date, locale, "short")}, ${date
         .getDate()
         .toString()}`; */
+
+      if (date.getDay() === 1) {
+        middleValues.push(
+          <text
+            key={date.getTime() + "middle"}
+            y={headerHeight * 0.65} // Adjust the y value as needed
+            x={columnWidth * i + columnWidth * 0.55}
+            className={styles.calendarMiddleText} // Add a new style for the middle text
+          >
+            {middleValue}
+          </text>
+        );
+      }
 
       const bottomValue = date.toLocaleDateString(locale, {
         day: "2-digit",
@@ -188,7 +221,7 @@ export const Calendar: React.FC<CalendarProps> = ({
       bottomValues.push(
         <text
           key={date.getTime()}
-          y={headerHeight * 0.8}
+          y={headerHeight * 0.9}
           x={columnWidth * i + columnWidth * 0.5}
           className={styles.calendarBottomText}
         >
@@ -203,7 +236,7 @@ export const Calendar: React.FC<CalendarProps> = ({
         const topValue = `${getLocaleMonth(
           date,
           locale
-        )}, ${date.getFullYear()}`;
+        ).toUpperCase()}, ${date.getFullYear()}`;
 
         topValues.push(
           <TopPartOfCalendar
@@ -223,7 +256,7 @@ export const Calendar: React.FC<CalendarProps> = ({
         );
       }
     }
-    return [topValues, bottomValues];
+    return [topValues, bottomValues, middleValues];
   };
 
   const getCalendarValuesForPartOfDay = () => {
@@ -321,6 +354,7 @@ export const Calendar: React.FC<CalendarProps> = ({
 
   let topValues: ReactChild[] = [];
   let bottomValues: ReactChild[] = [];
+  let middleValues: ReactChild[] = [];
   switch (dateSetup.viewMode) {
     case ViewMode.Year:
       [topValues, bottomValues] = getCalendarValuesForYear();
@@ -332,7 +366,7 @@ export const Calendar: React.FC<CalendarProps> = ({
       [topValues, bottomValues] = getCalendarValuesForWeek();
       break;
     case ViewMode.Day:
-      [topValues, bottomValues] = getCalendarValuesForDay();
+      [topValues, bottomValues, middleValues] = getCalendarValuesForDay();
       break;
     case ViewMode.QuarterDay:
     case ViewMode.HalfDay:
@@ -350,7 +384,7 @@ export const Calendar: React.FC<CalendarProps> = ({
         height={headerHeight}
         className={styles.calendarHeader}
       />
-      {bottomValues} {topValues}
+      {bottomValues} {middleValues} {topValues}
     </g>
   );
 };
