@@ -3,6 +3,7 @@ import { Task, ViewMode, Gantt, OnRelationChange } from "gantt-task-react";
 import { ViewSwitcher } from "./components/view-switcher";
 import { getStartEndDateForProject } from "./helper";
 import "gantt-task-react/dist/index.css";
+import { BarTask } from "../../dist/types/bar-task";
 
 const currentDate = new Date();
 const data: Task[] = [
@@ -134,10 +135,31 @@ const App = () => {
   } else if (view === ViewMode.Week) {
     columnWidth = 250;
   }
+  console.log("TASKS APP", tasks);
+  const handleTaskChange = (task: Task, children: BarTask[]) => {
+    const prevTaskState = tasks.filter(t => t.id === task.id)[0];
+    const prevStart: Date = new Date(prevTaskState.start);
+    const newStart: Date = new Date(task.start);
+    const difference: number = newStart.getTime() - prevStart.getTime();
+    const dayDiff: number = difference / (1000 * 60 * 60 * 24);
 
-  const handleTaskChange = (task: Task) => {
-    console.log("On date change Id:" + task.id);
-    let newTasks = tasks.map(t => (t.id === task.id ? task : t));
+    console.log("DAYDIFF", Math.round(dayDiff), task.id);
+
+    let updatedTask = tasks.map(t => (t.id === task.id ? task : t));
+
+    const changedTaskData = getAllChildrenInfo(children);
+    changedTaskData[task.id] = { start: task.start, end: task.end };
+
+    let updatedGroupTask = tasks.map(t => {
+      if (changedTaskData.hasOwnProperty(t.id)) {
+        t.start = changedTaskData[t.id].start;
+        t.end = changedTaskData[t.id].end;
+      }
+      return t;
+    });
+
+    let newTasks = changedTaskData ? updatedGroupTask : updatedTask;
+    /* newTasks =  */
     if (task.project) {
       const [start, end] = getStartEndDateForProject(newTasks, task.project);
       const project = newTasks[newTasks.findIndex(t => t.id === task.project)];
@@ -151,6 +173,7 @@ const App = () => {
         );
       }
     }
+
     setTasks(newTasks);
   };
 
@@ -301,3 +324,14 @@ const App = () => {
 };
 
 export default App;
+
+function getAllChildrenInfo(tasks: BarTask[]) {
+  return tasks.reduce((result, task) => {
+    if (task.barChildren && task.barChildren.length > 0) {
+      const childrenInfo = getAllChildrenInfo(task.barChildren);
+      Object.assign(result, childrenInfo);
+    }
+    result[task.id] = { start: task.start, end: task.end };
+    return result;
+  }, {});
+}

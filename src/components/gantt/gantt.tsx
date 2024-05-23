@@ -208,10 +208,11 @@ export const Gantt: React.FunctionComponent<GanttProps> = ({
   ]);
 
   useEffect(() => {
-    const { changedTask, action } = ganttEvent;
+    const { changedTask, action, changedTasks } = ganttEvent;
     if (changedTask) {
       if (action === "delete") {
         setGanttEvent({ action: "" });
+
         setBarTasks(barTasks.filter(t => t.id !== changedTask.id));
       } else if (
         action === "move" ||
@@ -226,15 +227,47 @@ export const Gantt: React.FunctionComponent<GanttProps> = ({
             prevStateTask.end.getTime() !== changedTask.end.getTime() ||
             prevStateTask.progress !== changedTask.progress)
         ) {
-          // actions for change
-          const newTaskList = barTasks.map(t =>
-            t.id === changedTask.id ? changedTask : t
-          );
-          setBarTasks(newTaskList);
+          console.log("CHANGED TASKS", changedTasks);
+
+          if (
+            changedTasks?.length !== 0 &&
+            changedTasks?.length !== undefined
+          ) {
+            console.log("CHANGED TASKSTEST", changedTasks);
+
+            const mergedArray = barTasks.map(barTask => {
+              const changedItem = changedTasks.find(
+                item => item.id === barTask.id
+              );
+              console.log("CHITM", changedItem);
+              if (changedItem) {
+                console.log({
+                  ...barTask,
+                  ...changedItem,
+                  //offset: changedItem.x1 - barTasks[1].x1,
+                });
+                return {
+                  ...barTask,
+                  ...changedItem,
+                  //offset: changedItem.x1 - barTasks[1].x1,
+                };
+              } else {
+                return barTask;
+              }
+            });
+            setBarTasks(mergedArray);
+            //setBarTasks(changedTasks);
+            console.log("BAR TASKS", mergedArray);
+          } else {
+            const newTaskList = barTasks.map(t =>
+              t.id === changedTask.id ? changedTask : t
+            );
+            setBarTasks(newTaskList);
+          }
         }
       }
     }
-  }, [ganttEvent, barTasks]);
+  }, [barTasks, ganttEvent]);
 
   useEffect(() => {
     if (failedTask) {

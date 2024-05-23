@@ -45,7 +45,7 @@ export const convertToBarTasks = (
       milestoneBackgroundSelectedColor
     );
   });
-
+  console.log("BARTASKS", barTasks);
   // set dependencies
   barTasks = barTasks.map(task => {
     const dependencies = task.dependencies || [];
@@ -53,7 +53,13 @@ export const convertToBarTasks = (
       const dependence = barTasks.findIndex(
         value => value.id === dependencies[j]
       );
-      if (dependence !== -1) barTasks[dependence].barChildren.push(task);
+      if (dependence !== -1) {
+        barTasks[dependence].barChildren.push(task);
+
+        task.offset = task.x1 - barTasks[1].x1;
+      } else {
+        task.offset = 0;
+      }
     }
     return task;
   });
@@ -355,12 +361,34 @@ const endByX = (x: number, xStep: number, task: BarTask) => {
   return newX;
 };
 
-const moveByX = (x: number, xStep: number, task: BarTask) => {
+const moveByX = (
+  x: number,
+  xStep: number,
+  task: BarTask,
+  prevTask: BarTask | undefined
+) => {
   const steps = Math.round((x - task.x1) / xStep);
   const additionalXValue = steps * xStep;
-  const newX1 = task.x1 + additionalXValue;
+  let newX1 = task.x1 + additionalXValue;
+  newX1 = prevTask ? (newX1 < prevTask.x2 ? prevTask.x2 : newX1) : newX1;
   const newX2 = newX1 + task.x2 - task.x1;
+  //console.log("TASK MOVEX", task.id, newX1, newX2);
   return [newX1, newX2];
+};
+
+const moveByXForEach = (
+  task: BarTask,
+  newMoveX1: number,
+  selectedTask: BarTask
+) => {
+  const taskOffset = task.offset || 0;
+  const selectedTaskOffset = selectedTask.offset || 0;
+  const newTaskOffset = taskOffset - selectedTaskOffset;
+
+  const newX1Test = newMoveX1 + newTaskOffset;
+  const newX2Test = newX1Test + task.x2 - task.x1;
+
+  return { newX1Test, newX2Test };
 };
 
 const dateByX = (
@@ -385,28 +413,37 @@ export const handleTaskBySVGMouseEvent = (
   svgX: number,
   action: BarMoveAction,
   selectedTask: BarTask,
+  tasks: BarTask[],
   xStep: number,
   timeStep: number,
   initEventX1Delta: number,
   rtl: boolean
-): { isChanged: boolean; changedTask: BarTask } => {
-  let result: { isChanged: boolean; changedTask: BarTask };
+): { isChanged: boolean; changedTask: BarTask; changedTasks: BarTask[] } => {
+  let result: {
+    isChanged: boolean;
+    changedTask: BarTask;
+    changedTasks: BarTask[];
+  };
   switch (selectedTask.type) {
     case "milestone":
       result = handleTaskBySVGMouseEventForMilestone(
         svgX,
         action,
         selectedTask,
+        tasks,
         xStep,
         timeStep,
         initEventX1Delta
       );
       break;
     default:
+      console.log("MOVING");
+
       result = handleTaskBySVGMouseEventForBar(
         svgX,
         action,
         selectedTask,
+        tasks,
         xStep,
         timeStep,
         initEventX1Delta,
@@ -421,13 +458,17 @@ const handleTaskBySVGMouseEventForBar = (
   svgX: number,
   action: BarMoveAction,
   selectedTask: BarTask,
+  tasks: BarTask[],
   xStep: number,
   timeStep: number,
   initEventX1Delta: number,
   rtl: boolean
-): { isChanged: boolean; changedTask: BarTask } => {
+): { isChanged: boolean; changedTask: BarTask; changedTasks: BarTask[] } => {
+  const changedTasks: BarTask[] = [];
   const changedTask: BarTask = { ...selectedTask };
   let isChanged = false;
+  //getAllBarChildrens
+
   switch (action) {
     case "progress":
       if (rtl) {
@@ -514,13 +555,21 @@ const handleTaskBySVGMouseEventForBar = (
       break;
     }
     case "move": {
+      //GET ARRAY OF DEPENDENT TASKS AND POP LAST ITEM TO SET MIN DATE RESTRICTION!
+      const prevDependentTask = tasks
+        .filter(item => selectedTask.dependencies?.includes(item.id))
+        .pop();
+
       const [newMoveX1, newMoveX2] = moveByX(
         svgX - initEventX1Delta,
         xStep,
-        selectedTask
+        selectedTask,
+        prevDependentTask
       );
       isChanged = newMoveX1 !== selectedTask.x1;
       if (isChanged) {
+        console.log("IZVODI SE");
+
         changedTask.start = dateByX(
           newMoveX1,
           selectedTask.x1,
@@ -535,8 +584,12 @@ const handleTaskBySVGMouseEventForBar = (
           xStep,
           timeStep
         );
+
         changedTask.x1 = newMoveX1;
         changedTask.x2 = newMoveX2;
+
+        //changedTask.offset = changedTask.x1 - tasks[1].x1;
+
         const [progressWidth, progressX] = progressWithByParams(
           changedTask.x1,
           changedTask.x2,
@@ -545,29 +598,88 @@ const handleTaskBySVGMouseEventForBar = (
         );
         changedTask.progressWidth = progressWidth;
         changedTask.progressX = progressX;
+        console.log("IZVODI SE", changedTask);
+        //if (changedTask.barChildren.length === 0)
+        //return { isChanged, changedTask, changedTasks };
+
+        const childrenIds = getAllBarChildrenIds(changedTask);
+        //const copyTasks = tasks;
+        tasks
+          .filter(t => childrenIds.includes(t.id))
+          .map(task => {
+            const { newX1Test, newX2Test } = moveByXForEach(
+              task,
+              newMoveX1,
+              selectedTask
+            );
+            task.start = dateByX(
+              newX1Test,
+              task.x1,
+              task.start,
+              xStep,
+              timeStep
+            );
+            task.end = dateByX(newX2Test, task.x2, task.end, xStep, timeStep);
+            //selectedTask.offset = selectedTask.x1 - tasks[1].x1;
+            task.x1 = newX1Test;
+            task.x2 = newX2Test;
+
+            const [progressWidth, progressX] = progressWithByParams(
+              task.x1,
+              task.x2,
+              task.progress,
+              rtl
+            );
+            task.progressWidth = progressWidth;
+            task.progressX = progressX;
+            changedTasks.push(task);
+            return task;
+          });
+
+        /* tasks
+          .filter(task => selectedTask.id === task.id)
+          .map(
+            task =>
+              (task.offset =
+                selectedTask.offset || 0 + newMoveX1 - selectedTask.x1)
+          ); */
       }
-      break;
+      //break;
     }
   }
-  return { isChanged, changedTask };
+  /*   console.log("CHANGED TASKS", {
+    isChanged,
+    changedTask: changedTask || selectedTask,
+    changedTasks,
+  }); */
+  console.log("CODE 1", changedTasks);
+  return { isChanged, changedTask: changedTask, changedTasks };
 };
 
 const handleTaskBySVGMouseEventForMilestone = (
   svgX: number,
   action: BarMoveAction,
   selectedTask: BarTask,
+  tasks: BarTask[],
   xStep: number,
   timeStep: number,
   initEventX1Delta: number
-): { isChanged: boolean; changedTask: BarTask } => {
+): { isChanged: boolean; changedTask: BarTask; changedTasks: BarTask[] } => {
+  const changedTasks: BarTask[] = [];
   const changedTask: BarTask = { ...selectedTask };
   let isChanged = false;
   switch (action) {
     case "move": {
+      //fix
+      const prevTaskIndex =
+        tasks.findIndex(task => task.id === selectedTask.id) - 1;
+      const prevTask = tasks[prevTaskIndex];
+
       const [newMoveX1, newMoveX2] = moveByX(
         svgX - initEventX1Delta,
         xStep,
-        selectedTask
+        selectedTask,
+        prevTask
       );
       isChanged = newMoveX1 !== selectedTask.x1;
       if (isChanged) {
@@ -585,5 +697,22 @@ const handleTaskBySVGMouseEventForMilestone = (
       break;
     }
   }
-  return { isChanged, changedTask };
+  return { isChanged, changedTask, changedTasks };
 };
+
+function getAllBarChildrenIds(obj: BarTask) {
+  let ids: string[] = [];
+  if (!ids.includes(obj.id)) {
+    ids.push(obj.id);
+  }
+
+  if (obj.barChildren && obj.barChildren.length > 0) {
+    for (const child of obj.barChildren) {
+      if (!ids.includes(child.id)) {
+        ids.push(child.id);
+      }
+      ids = ids.concat(getAllBarChildrenIds(child));
+    }
+  }
+  return ids;
+}
